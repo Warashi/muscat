@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package dev.warashi.muscat;
+option go_package="github.com/Warashi/muscat/pb";
+
+message OpenRequest {
+  string uri = 1;
+}
+message OpenResponse {}
+
+message CopyRequest {
+  bytes Body = 1;
+}
+
+message CopyResponse {}
+
+message PasteRequest {}
+message PasteResponse {
+  bytes Body = 1;
+}
+
+service Muscat {
+  rpc Open(OpenRequest) returns (OpenResponse);
+  rpc Copy(stream CopyRequest) returns (CopyResponse);
+  rpc Paste(PasteRequest) returns (stream PasteResponse);
+}
