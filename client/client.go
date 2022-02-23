@@ -61,11 +61,7 @@ func (r *streamReader) Read(p []byte) (n int, err error) {
 			return 0, fmt.Errorf("r.buffer.Write: %w", err)
 		}
 	}
-	n, err = r.buffer.Read(p)
-	if err != nil {
-		return n, fmt.Errorf("r.buffer.Read: %w", err)
-	}
-	return n, nil
+	return r.buffer.Read(p)
 }
 
 func (m *Muscat) Open(ctx context.Context, uri string) error {
@@ -87,6 +83,9 @@ func (m *Muscat) Copy(ctx context.Context, r io.Reader) error {
 	}
 	if err := dst.Flush(); err != nil {
 		return fmt.Errorf("dst.Flush: %w", err)
+	}
+	if _, err := stream.CloseAndRecv(); err != nil {
+		return fmt.Errorf("stream.CloseAndRecv: %w", err)
 	}
 	return nil
 }
