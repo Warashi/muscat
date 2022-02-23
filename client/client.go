@@ -84,7 +84,7 @@ func (m *Muscat) Copy(ctx context.Context, r io.Reader) error {
 	if err := dst.Flush(); err != nil {
 		return fmt.Errorf("dst.Flush: %w", err)
 	}
-	if _, err := stream.CloseAndRecv(); err != nil {
+	if _, err := stream.CloseAndRecv(); err != nil && !errors.Is(err, io.EOF) {
 		return fmt.Errorf("stream.CloseAndRecv: %w", err)
 	}
 	return nil
