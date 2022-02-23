@@ -47,7 +47,7 @@ to quickly create a Cobra application.`,
 			log.Fatalf("client.New: %v", err)
 		}
 		if err := muscat.Open(context.Background(), args[0]); err != nil {
-			log.Fatalf("muscat.Copy: %v", err)
+			log.Fatalf("muscat.Open: %v", err)
 		}
 	},
 }

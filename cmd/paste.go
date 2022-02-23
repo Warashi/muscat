@@ -49,7 +49,7 @@ to quickly create a Cobra application.`,
 		}
 		r, err := muscat.Paste(context.Background())
 		if err != nil {
-			log.Fatalf("muscat.Copy: %v", err)
+			log.Fatalf("muscat.Paste: %v", err)
 		}
 		if _, err := io.Copy(os.Stdout, r); err != nil {
 			log.Fatalf("io.Copy: %v", err)
