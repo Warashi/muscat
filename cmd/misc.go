@@ -11,5 +11,5 @@ func mustGetSocketPath() string {
 	if err != nil {
 		log.Fatalf("os.UserHomeDir: %v", err)
 	}
-	return filepath.Join(home, ".muscat", "socket")
+	return filepath.Join(home, ".muscat.socket")
 }
