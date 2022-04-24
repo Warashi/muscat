@@ -8,12 +8,22 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"net/url"
+	"os"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/Warashi/muscat/pb"
 )
+
+var osHostname string
+
+func init() {
+	if h, err := os.Hostname(); err == nil {
+		osHostname = h
+	}
+}
 
 func socketDialer(ctx context.Context, addr string) (net.Conn, error) {
 	var d net.Dialer
@@ -64,7 +74,42 @@ func (r *streamReader) Read(p []byte) (n int, err error) {
 	return r.buffer.Read(p)
 }
 
+func replaceLoopback(uri string) (s string) {
+	if osHostname == "" {
+		return uri
+	}
+	u, err := url.Parse(uri)
+	if err != nil || u.Host == "" {
+		u, err = url.Parse("http://" + uri)
+	}
+	if err != nil {
+		return uri
+	}
+	host, port := u.Host, ""
+	if h, p, err := net.SplitHostPort(u.Host); err == nil {
+		host, port = h, p
+	}
+	if ip := net.ParseIP(host); ip != nil && ip.IsLoopback() {
+		if port == "" {
+			u.Host = osHostname
+		} else {
+			u.Host = net.JoinHostPort(osHostname, port)
+		}
+		return u.String()
+	}
+	if ip, err := net.LookupIP(host); err == nil && len(ip) > 0 && ip[0].IsLoopback() {
+		if port == "" {
+			u.Host = osHostname
+		} else {
+			u.Host = net.JoinHostPort(osHostname, port)
+		}
+		return u.String()
+	}
+	return uri
+}
+
 func (m *Muscat) Open(ctx context.Context, uri string) error {
+	uri = replaceLoopback(uri)
 	if _, err := m.pb.Open(ctx, &pb.OpenRequest{Uri: uri}); err != nil {
 		return fmt.Errorf("m.pb.Open: %w", err)
 	}
