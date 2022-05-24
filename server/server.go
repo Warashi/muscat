@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"sync"
 
 	"github.com/atotto/clipboard"
 	"github.com/skratchdot/open-golang/open"
@@ -15,6 +16,11 @@ import (
 
 type Muscat struct {
 	pb.UnimplementedMuscatServer
+
+	// mu clipboard用のmutex
+	mu sync.Mutex
+	// clipboard OSのクリップボードが使えないときにここに保持する
+	clipboard string
 }
 
 func (m *Muscat) Open(ctx context.Context, request *pb.OpenRequest) (*pb.OpenResponse, error) {
@@ -43,6 +49,13 @@ func (m *Muscat) Copy(stream pb.Muscat_CopyServer) error {
 			return fmt.Errorf("could not write whole body")
 		}
 	}
+	if clipboard.Unsupported {
+		// OSのクリップボードが使えないのでサーバーローカルに保持する
+		m.mu.Lock()
+		defer m.mu.Unlock()
+		m.clipboard = buf.String()
+		return nil
+	}
 	if err := clipboard.WriteAll(buf.String()); err != nil {
 		return fmt.Errorf("clipboard.WriteAll: %w", err)
 	}
@@ -50,9 +63,17 @@ func (m *Muscat) Copy(stream pb.Muscat_CopyServer) error {
 }
 
 func (m *Muscat) Paste(_ *pb.PasteRequest, stream pb.Muscat_PasteServer) error {
-	body, err := clipboard.ReadAll()
-	if err != nil {
-		return fmt.Errorf("clipboard.ReadAll: %w", err)
+	var body string
+	if clipboard.Unsupported {
+		m.mu.Lock()
+		body = m.clipboard
+		m.mu.Unlock()
+	} else {
+		var err error
+		body, err = clipboard.ReadAll()
+		if err != nil {
+			return fmt.Errorf("clipboard.ReadAll: %w", err)
+		}
 	}
 	for i := 0; i < len(body); i += 1024 {
 		start, end := i, i+1024
