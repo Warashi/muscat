@@ -142,3 +142,11 @@ func (m *Muscat) Paste(ctx context.Context) (io.Reader, error) {
 	}
 	return bufio.NewReader(&streamReader{stream: stream}), nil
 }
+
+func (m *Muscat) Health(ctx context.Context) (int, error) {
+	res, err := m.pb.Health(ctx, new(pb.HealthRequest))
+	if err != nil {
+		return 0, fmt.Errorf("m.pb.Health: %w", err)
+	}
+	return int(res.GetPid()), nil
+}

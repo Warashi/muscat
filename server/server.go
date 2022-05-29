@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"os"
 	"sync"
 
 	"github.com/atotto/clipboard"
@@ -85,4 +86,8 @@ func (m *Muscat) Paste(_ *pb.PasteRequest, stream pb.Muscat_PasteServer) error {
 		}
 	}
 	return nil
+}
+
+func (m *Muscat) Health(context.Context, *pb.HealthRequest) (*pb.HealthResponse, error) {
+	return &pb.HealthResponse{Pid: int64(os.Getpid())}, nil
 }
