@@ -25,6 +25,7 @@ type MuscatClient interface {
 	Open(ctx context.Context, in *OpenRequest, opts ...grpc.CallOption) (*OpenResponse, error)
 	Copy(ctx context.Context, opts ...grpc.CallOption) (Muscat_CopyClient, error)
 	Paste(ctx context.Context, in *PasteRequest, opts ...grpc.CallOption) (Muscat_PasteClient, error)
+	Health(ctx context.Context, in *HealthRequest, opts ...grpc.CallOption) (*HealthResponse, error)
 }
 
 type muscatClient struct {
@@ -110,6 +111,15 @@ func (x *muscatPasteClient) Recv() (*PasteResponse, error) {
 	return m, nil
 }
 
+func (c *muscatClient) Health(ctx context.Context, in *HealthRequest, opts ...grpc.CallOption) (*HealthResponse, error) {
+	out := new(HealthResponse)
+	err := c.cc.Invoke(ctx, "/dev.warashi.muscat.Muscat/Health", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MuscatServer is the server API for Muscat service.
 // All implementations must embed UnimplementedMuscatServer
 // for forward compatibility
@@ -117,6 +127,7 @@ type MuscatServer interface {
 	Open(context.Context, *OpenRequest) (*OpenResponse, error)
 	Copy(Muscat_CopyServer) error
 	Paste(*PasteRequest, Muscat_PasteServer) error
+	Health(context.Context, *HealthRequest) (*HealthResponse, error)
 	mustEmbedUnimplementedMuscatServer()
 }
 
@@ -132,6 +143,9 @@ func (UnimplementedMuscatServer) Copy(Muscat_CopyServer) error {
 }
 func (UnimplementedMuscatServer) Paste(*PasteRequest, Muscat_PasteServer) error {
 	return status.Errorf(codes.Unimplemented, "method Paste not implemented")
+}
+func (UnimplementedMuscatServer) Health(context.Context, *HealthRequest) (*HealthResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Health not implemented")
 }
 func (UnimplementedMuscatServer) mustEmbedUnimplementedMuscatServer() {}
 
@@ -211,6 +225,24 @@ func (x *muscatPasteServer) Send(m *PasteResponse) error {
 	return x.ServerStream.SendMsg(m)
 }
 
+func _Muscat_Health_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(HealthRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MuscatServer).Health(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/dev.warashi.muscat.Muscat/Health",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MuscatServer).Health(ctx, req.(*HealthRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Muscat_ServiceDesc is the grpc.ServiceDesc for Muscat service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -221,6 +253,10 @@ var Muscat_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Open",
 			Handler:    _Muscat_Open_Handler,
+		},
+		{
+			MethodName: "Health",
+			Handler:    _Muscat_Health_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

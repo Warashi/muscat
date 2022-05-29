@@ -19,8 +19,15 @@ message PasteResponse {
   bytes Body = 1;
 }
 
+message HealthRequest { }
+
+message HealthResponse {
+  int64 pid = 1;
+}
+
 service Muscat {
   rpc Open(OpenRequest) returns (OpenResponse);
   rpc Copy(stream CopyRequest) returns (CopyResponse);
   rpc Paste(PasteRequest) returns (stream PasteResponse);
+  rpc Health(HealthRequest) returns (HealthResponse);
 }
