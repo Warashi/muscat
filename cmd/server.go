@@ -44,6 +44,7 @@ var serverCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		pid := os.Getpid()
 		_ = os.Remove(mustGetSocketPath())
+		time.Sleep(100 * time.Millisecond) // delay to remove socket completely
 		l, err := net.Listen("unix", mustGetSocketPath())
 		if err != nil {
 			log.Fatalf("net.Listen: %v", err)
