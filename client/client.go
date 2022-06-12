@@ -39,7 +39,8 @@ func New(socketPath string) (*Muscat, error) {
 }
 
 type Muscat struct {
-	pb pb.MuscatClient
+	pb   pb.MuscatClient
+	conn io.Closer
 }
 
 type streamWriter struct {
@@ -149,4 +150,11 @@ func (m *Muscat) Health(ctx context.Context) (int, error) {
 		return 0, fmt.Errorf("m.pb.Health: %w", err)
 	}
 	return int(res.GetPid()), nil
+}
+
+func (m *Muscat) Close() error {
+	if err := m.conn.Close(); err != nil {
+		return fmt.Errorf("m.conn.Close: %w", err)
+	}
+	return nil
 }

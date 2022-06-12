@@ -75,6 +75,7 @@ func healthy(pid int) bool {
 	if err != nil {
 		log.Fatalf("client.New: %v", err)
 	}
+	defer c.Close()
 	serverPid, err := c.Health(ctx)
 	return err == nil && pid == serverPid
 }
