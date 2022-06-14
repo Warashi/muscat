@@ -35,7 +35,7 @@ func New(socketPath string) (*Muscat, error) {
 	if err != nil {
 		return nil, fmt.Errorf("grpc.Dial: %w", err)
 	}
-	return &Muscat{pb: pb.NewMuscatClient(conn)}, nil
+	return &Muscat{pb: pb.NewMuscatClient(conn), conn: conn}, nil
 }
 
 type Muscat struct {
