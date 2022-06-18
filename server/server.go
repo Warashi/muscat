@@ -1,18 +1,20 @@
 package server
 
 import (
+	"bufio"
 	"bytes"
 	"context"
-	"errors"
 	"fmt"
 	"io"
 	"os"
+	"strings"
 	"sync"
 
 	"github.com/atotto/clipboard"
 	"github.com/skratchdot/open-golang/open"
 
 	"github.com/Warashi/muscat/pb"
+	"github.com/Warashi/muscat/stream"
 )
 
 type Muscat struct {
@@ -24,6 +26,10 @@ type Muscat struct {
 	clipboard string
 }
 
+func newPasteResponse(body []byte) *pb.PasteResponse {
+	return &pb.PasteResponse{Body: body}
+}
+
 func (m *Muscat) Open(ctx context.Context, request *pb.OpenRequest) (*pb.OpenResponse, error) {
 	if err := open.Run(request.Uri); err != nil {
 		return nil, fmt.Errorf("open.Run: %w", err)
@@ -31,25 +37,10 @@ func (m *Muscat) Open(ctx context.Context, request *pb.OpenRequest) (*pb.OpenRes
 	return new(pb.OpenResponse), nil
 }
 
-func (m *Muscat) Copy(stream pb.Muscat_CopyServer) error {
-	var buf bytes.Buffer
+func (m *Muscat) Copy(s pb.Muscat_CopyServer) error {
+	buf, src := new(bytes.Buffer), bufio.NewReader(stream.NewReader[*pb.CopyRequest](s))
+	io.Copy(buf, src)
 
-	for {
-		msg, err := stream.Recv()
-		if err != nil {
-			if errors.Is(err, io.EOF) {
-				break
-			}
-			return fmt.Errorf("stream.Recv: %w", err)
-		}
-		n, err := buf.Write(msg.GetBody())
-		if err != nil {
-			return fmt.Errorf("buf.Write: %w", err)
-		}
-		if n != len(msg.GetBody()) {
-			return fmt.Errorf("could not write whole body")
-		}
-	}
 	if clipboard.Unsupported {
 		// OSのクリップボードが使えないのでサーバーローカルに保持する
 		m.mu.Lock()
@@ -63,7 +54,8 @@ func (m *Muscat) Copy(stream pb.Muscat_CopyServer) error {
 	return nil
 }
 
-func (m *Muscat) Paste(_ *pb.PasteRequest, stream pb.Muscat_PasteServer) error {
+func (m *Muscat) Paste(_ *pb.PasteRequest, s pb.Muscat_PasteServer) error {
+	dst := stream.NewWriter[*pb.PasteResponse](newPasteResponse, s)
 	var body string
 	if clipboard.Unsupported {
 		m.mu.Lock()
@@ -76,14 +68,8 @@ func (m *Muscat) Paste(_ *pb.PasteRequest, stream pb.Muscat_PasteServer) error {
 			return fmt.Errorf("clipboard.ReadAll: %w", err)
 		}
 	}
-	for i := 0; i < len(body); i += 1024 {
-		start, end := i, i+1024
-		if len(body) <= end {
-			end = len(body)
-		}
-		if err := stream.Send(&pb.PasteResponse{Body: []byte(body[start:end])}); err != nil {
-			return fmt.Errorf("stream.Send: %w", err)
-		}
+	if _, err := io.Copy(dst, strings.NewReader(body)); err != nil {
+		return fmt.Errorf("io.Copy: %w", err)
 	}
 	return nil
 }

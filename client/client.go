@@ -2,7 +2,6 @@ package client
 
 import (
 	"bufio"
-	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -15,6 +14,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/Warashi/muscat/pb"
+	"github.com/Warashi/muscat/stream"
 )
 
 var osHostname string
@@ -30,6 +30,10 @@ func socketDialer(ctx context.Context, addr string) (net.Conn, error) {
 	return d.DialContext(ctx, "unix", addr)
 }
 
+func newCopyRequest(body []byte) *pb.CopyRequest {
+	return &pb.CopyRequest{Body: body}
+}
+
 func New(socketPath string) (*Muscat, error) {
 	conn, err := grpc.Dial(socketPath, grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithContextDialer(socketDialer))
 	if err != nil {
@@ -41,38 +45,6 @@ func New(socketPath string) (*Muscat, error) {
 type Muscat struct {
 	pb   pb.MuscatClient
 	conn io.Closer
-}
-
-type streamWriter struct {
-	stream pb.Muscat_CopyClient
-}
-
-func (w *streamWriter) Write(p []byte) (n int, err error) {
-	if err := w.stream.Send(&pb.CopyRequest{Body: p}); err != nil {
-		return 0, fmt.Errorf("w.stream.Send: %w", err)
-	}
-	return len(p), nil
-}
-
-type streamReader struct {
-	stream pb.Muscat_PasteClient
-	buffer bytes.Buffer
-}
-
-func (r *streamReader) Read(p []byte) (n int, err error) {
-	for r.buffer.Len() < len(p) {
-		b, err := r.stream.Recv()
-		if err != nil {
-			if errors.Is(err, io.EOF) {
-				break
-			}
-			return 0, fmt.Errorf("r.stream.Recv: %w", err)
-		}
-		if _, err := r.buffer.Write(b.GetBody()); err != nil {
-			return 0, fmt.Errorf("r.buffer.Write: %w", err)
-		}
-	}
-	return r.buffer.Read(p)
 }
 
 func replaceLoopback(uri string) (s string) {
@@ -118,30 +90,30 @@ func (m *Muscat) Open(ctx context.Context, uri string) error {
 }
 
 func (m *Muscat) Copy(ctx context.Context, r io.Reader) error {
-	stream, err := m.pb.Copy(ctx)
+	s, err := m.pb.Copy(ctx)
 	if err != nil {
 		return fmt.Errorf("m.pb.Copy: %w", err)
 	}
 
-	dst, src := bufio.NewWriter(&streamWriter{stream: stream}), bufio.NewReader(r)
+	dst, src := bufio.NewWriter(stream.NewWriter[*pb.CopyRequest](newCopyRequest, s)), bufio.NewReader(r)
 	if _, err := io.Copy(dst, src); err != nil {
 		return fmt.Errorf("io.Copy: %w", err)
 	}
 	if err := dst.Flush(); err != nil {
 		return fmt.Errorf("dst.Flush: %w", err)
 	}
-	if _, err := stream.CloseAndRecv(); err != nil && !errors.Is(err, io.EOF) {
+	if _, err := s.CloseAndRecv(); err != nil && !errors.Is(err, io.EOF) {
 		return fmt.Errorf("stream.CloseAndRecv: %w", err)
 	}
 	return nil
 }
 
 func (m *Muscat) Paste(ctx context.Context) (io.Reader, error) {
-	stream, err := m.pb.Paste(ctx, new(pb.PasteRequest))
+	s, err := m.pb.Paste(ctx, new(pb.PasteRequest))
 	if err != nil {
 		return nil, fmt.Errorf("m.pb.Paste: %w", err)
 	}
-	return bufio.NewReader(&streamReader{stream: stream}), nil
+	return bufio.NewReader(stream.NewReader[*pb.PasteResponse](s)), nil
 }
 
 func (m *Muscat) Health(ctx context.Context) (int, error) {
