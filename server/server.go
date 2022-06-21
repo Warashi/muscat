@@ -39,7 +39,9 @@ func (m *Muscat) Open(ctx context.Context, request *pb.OpenRequest) (*pb.OpenRes
 
 func (m *Muscat) Copy(s pb.Muscat_CopyServer) error {
 	buf, src := new(bytes.Buffer), bufio.NewReader(stream.NewReader[*pb.CopyRequest](s))
-	io.Copy(buf, src)
+	if _, err := io.Copy(buf, src); err != nil {
+		return fmt.Errorf("io.Copy: %w", err)
+	}
 
 	if clipboard.Unsupported {
 		// OSのクリップボードが使えないのでサーバーローカルに保持する
