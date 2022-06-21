@@ -52,7 +52,7 @@ var serverCmd = &cobra.Command{
 
 		s := grpc.NewServer()
 		go func() {
-			t := time.NewTicker(100 * time.Millisecond)
+			t := time.NewTicker(1 * time.Second)
 			for range t.C {
 				if !healthy(pid) {
 					s.Stop()
