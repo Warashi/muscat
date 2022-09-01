@@ -22,7 +22,7 @@ func Write(data []byte) error {
 	if Unsupported() {
 		return ErrUnsupported
 	}
-	<-clipboard.Write(clipboard.FmtText, data)
+	clipboard.Write(clipboard.FmtText, data)
 	return nil
 }
 
