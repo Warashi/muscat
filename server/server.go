@@ -7,13 +7,12 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"strings"
 	"sync"
 
-	"github.com/atotto/clipboard"
 	"github.com/skratchdot/open-golang/open"
 
 	"github.com/Warashi/muscat/pb"
+	"github.com/Warashi/muscat/server/internal/clipboard"
 	"github.com/Warashi/muscat/stream"
 )
 
@@ -23,7 +22,7 @@ type Muscat struct {
 	// mu clipboard用のmutex
 	mu sync.Mutex
 	// clipboard OSのクリップボードが使えないときにここに保持する
-	clipboard string
+	clipboard []byte
 }
 
 func newPasteResponse(body []byte) *pb.PasteResponse {
@@ -43,14 +42,14 @@ func (m *Muscat) Copy(s pb.Muscat_CopyServer) error {
 		return fmt.Errorf("io.Copy: %w", err)
 	}
 
-	if clipboard.Unsupported {
+	if clipboard.Unsupported() {
 		// OSのクリップボードが使えないのでサーバーローカルに保持する
 		m.mu.Lock()
 		defer m.mu.Unlock()
-		m.clipboard = buf.String()
+		m.clipboard = buf.Bytes()
 		return nil
 	}
-	if err := clipboard.WriteAll(buf.String()); err != nil {
+	if err := clipboard.Write(buf.Bytes()); err != nil {
 		return fmt.Errorf("clipboard.WriteAll: %w", err)
 	}
 	return nil
@@ -58,19 +57,19 @@ func (m *Muscat) Copy(s pb.Muscat_CopyServer) error {
 
 func (m *Muscat) Paste(_ *pb.PasteRequest, s pb.Muscat_PasteServer) error {
 	dst := stream.NewWriter[*pb.PasteResponse](newPasteResponse, s)
-	var body string
-	if clipboard.Unsupported {
+	var body []byte
+	if clipboard.Unsupported() {
 		m.mu.Lock()
 		body = m.clipboard
 		m.mu.Unlock()
 	} else {
 		var err error
-		body, err = clipboard.ReadAll()
+		body, err = clipboard.Read()
 		if err != nil {
 			return fmt.Errorf("clipboard.ReadAll: %w", err)
 		}
 	}
-	if _, err := io.Copy(dst, strings.NewReader(body)); err != nil {
+	if _, err := io.Copy(dst, bytes.NewReader(body)); err != nil {
 		return fmt.Errorf("io.Copy: %w", err)
 	}
 	return nil
