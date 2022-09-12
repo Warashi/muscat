@@ -22,10 +22,12 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type MuscatClient interface {
+	Health(ctx context.Context, in *HealthRequest, opts ...grpc.CallOption) (*HealthResponse, error)
 	Open(ctx context.Context, in *OpenRequest, opts ...grpc.CallOption) (*OpenResponse, error)
 	Copy(ctx context.Context, opts ...grpc.CallOption) (Muscat_CopyClient, error)
 	Paste(ctx context.Context, in *PasteRequest, opts ...grpc.CallOption) (Muscat_PasteClient, error)
-	Health(ctx context.Context, in *HealthRequest, opts ...grpc.CallOption) (*HealthResponse, error)
+	GetInputMethod(ctx context.Context, in *GetInputMethodRequest, opts ...grpc.CallOption) (*GetInputMethodResponse, error)
+	SetInputMethod(ctx context.Context, in *SetInputMethodRequest, opts ...grpc.CallOption) (*SetInputMethodResponse, error)
 }
 
 type muscatClient struct {
@@ -34,6 +36,15 @@ type muscatClient struct {
 
 func NewMuscatClient(cc grpc.ClientConnInterface) MuscatClient {
 	return &muscatClient{cc}
+}
+
+func (c *muscatClient) Health(ctx context.Context, in *HealthRequest, opts ...grpc.CallOption) (*HealthResponse, error) {
+	out := new(HealthResponse)
+	err := c.cc.Invoke(ctx, "/dev.warashi.muscat.Muscat/Health", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *muscatClient) Open(ctx context.Context, in *OpenRequest, opts ...grpc.CallOption) (*OpenResponse, error) {
@@ -111,9 +122,18 @@ func (x *muscatPasteClient) Recv() (*PasteResponse, error) {
 	return m, nil
 }
 
-func (c *muscatClient) Health(ctx context.Context, in *HealthRequest, opts ...grpc.CallOption) (*HealthResponse, error) {
-	out := new(HealthResponse)
-	err := c.cc.Invoke(ctx, "/dev.warashi.muscat.Muscat/Health", in, out, opts...)
+func (c *muscatClient) GetInputMethod(ctx context.Context, in *GetInputMethodRequest, opts ...grpc.CallOption) (*GetInputMethodResponse, error) {
+	out := new(GetInputMethodResponse)
+	err := c.cc.Invoke(ctx, "/dev.warashi.muscat.Muscat/GetInputMethod", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *muscatClient) SetInputMethod(ctx context.Context, in *SetInputMethodRequest, opts ...grpc.CallOption) (*SetInputMethodResponse, error) {
+	out := new(SetInputMethodResponse)
+	err := c.cc.Invoke(ctx, "/dev.warashi.muscat.Muscat/SetInputMethod", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -124,10 +144,12 @@ func (c *muscatClient) Health(ctx context.Context, in *HealthRequest, opts ...gr
 // All implementations must embed UnimplementedMuscatServer
 // for forward compatibility
 type MuscatServer interface {
+	Health(context.Context, *HealthRequest) (*HealthResponse, error)
 	Open(context.Context, *OpenRequest) (*OpenResponse, error)
 	Copy(Muscat_CopyServer) error
 	Paste(*PasteRequest, Muscat_PasteServer) error
-	Health(context.Context, *HealthRequest) (*HealthResponse, error)
+	GetInputMethod(context.Context, *GetInputMethodRequest) (*GetInputMethodResponse, error)
+	SetInputMethod(context.Context, *SetInputMethodRequest) (*SetInputMethodResponse, error)
 	mustEmbedUnimplementedMuscatServer()
 }
 
@@ -135,6 +157,9 @@ type MuscatServer interface {
 type UnimplementedMuscatServer struct {
 }
 
+func (UnimplementedMuscatServer) Health(context.Context, *HealthRequest) (*HealthResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Health not implemented")
+}
 func (UnimplementedMuscatServer) Open(context.Context, *OpenRequest) (*OpenResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Open not implemented")
 }
@@ -144,8 +169,11 @@ func (UnimplementedMuscatServer) Copy(Muscat_CopyServer) error {
 func (UnimplementedMuscatServer) Paste(*PasteRequest, Muscat_PasteServer) error {
 	return status.Errorf(codes.Unimplemented, "method Paste not implemented")
 }
-func (UnimplementedMuscatServer) Health(context.Context, *HealthRequest) (*HealthResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Health not implemented")
+func (UnimplementedMuscatServer) GetInputMethod(context.Context, *GetInputMethodRequest) (*GetInputMethodResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetInputMethod not implemented")
+}
+func (UnimplementedMuscatServer) SetInputMethod(context.Context, *SetInputMethodRequest) (*SetInputMethodResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SetInputMethod not implemented")
 }
 func (UnimplementedMuscatServer) mustEmbedUnimplementedMuscatServer() {}
 
@@ -158,6 +186,24 @@ type UnsafeMuscatServer interface {
 
 func RegisterMuscatServer(s grpc.ServiceRegistrar, srv MuscatServer) {
 	s.RegisterService(&Muscat_ServiceDesc, srv)
+}
+
+func _Muscat_Health_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(HealthRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MuscatServer).Health(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/dev.warashi.muscat.Muscat/Health",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MuscatServer).Health(ctx, req.(*HealthRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _Muscat_Open_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -225,20 +271,38 @@ func (x *muscatPasteServer) Send(m *PasteResponse) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-func _Muscat_Health_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(HealthRequest)
+func _Muscat_GetInputMethod_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetInputMethodRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MuscatServer).Health(ctx, in)
+		return srv.(MuscatServer).GetInputMethod(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/dev.warashi.muscat.Muscat/Health",
+		FullMethod: "/dev.warashi.muscat.Muscat/GetInputMethod",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MuscatServer).Health(ctx, req.(*HealthRequest))
+		return srv.(MuscatServer).GetInputMethod(ctx, req.(*GetInputMethodRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Muscat_SetInputMethod_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetInputMethodRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MuscatServer).SetInputMethod(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/dev.warashi.muscat.Muscat/SetInputMethod",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MuscatServer).SetInputMethod(ctx, req.(*SetInputMethodRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -251,12 +315,20 @@ var Muscat_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*MuscatServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
+			MethodName: "Health",
+			Handler:    _Muscat_Health_Handler,
+		},
+		{
 			MethodName: "Open",
 			Handler:    _Muscat_Open_Handler,
 		},
 		{
-			MethodName: "Health",
-			Handler:    _Muscat_Health_Handler,
+			MethodName: "GetInputMethod",
+			Handler:    _Muscat_GetInputMethod_Handler,
+		},
+		{
+			MethodName: "SetInputMethod",
+			Handler:    _Muscat_SetInputMethod_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
