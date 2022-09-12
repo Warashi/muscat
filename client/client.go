@@ -130,3 +130,18 @@ func (m *Muscat) Paste(ctx context.Context) (io.Reader, error) {
 	}
 	return bufio.NewReader(stream.NewReader[*pb.PasteResponse](s)), nil
 }
+
+func (m *Muscat) GetInputMethod(ctx context.Context) (string, error) {
+	res, err := m.pb.GetInputMethod(ctx, new(pb.GetInputMethodRequest))
+	if err != nil {
+		return "", fmt.Errorf("m.pb.GetInputMethod: %w", err)
+	}
+	return res.GetId(), nil
+}
+
+func (m *Muscat) SetInputMethod(ctx context.Context, id string) error {
+	if _, err := m.pb.SetInputMethod(ctx, &pb.SetInputMethodRequest{Id: id}); err != nil {
+		return fmt.Errorf("m.pb.SetInputMethod: %w", err)
+	}
+	return nil
+}
