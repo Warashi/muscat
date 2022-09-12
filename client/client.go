@@ -81,6 +81,21 @@ func replaceLoopback(uri string) (s string) {
 	return uri
 }
 
+func (m *Muscat) Health(ctx context.Context) (int, error) {
+	res, err := m.pb.Health(ctx, new(pb.HealthRequest))
+	if err != nil {
+		return 0, fmt.Errorf("m.pb.Health: %w", err)
+	}
+	return int(res.GetPid()), nil
+}
+
+func (m *Muscat) Close() error {
+	if err := m.conn.Close(); err != nil {
+		return fmt.Errorf("m.conn.Close: %w", err)
+	}
+	return nil
+}
+
 func (m *Muscat) Open(ctx context.Context, uri string) error {
 	uri = replaceLoopback(uri)
 	if _, err := m.pb.Open(ctx, &pb.OpenRequest{Uri: uri}); err != nil {
@@ -116,17 +131,17 @@ func (m *Muscat) Paste(ctx context.Context) (io.Reader, error) {
 	return bufio.NewReader(stream.NewReader[*pb.PasteResponse](s)), nil
 }
 
-func (m *Muscat) Health(ctx context.Context) (int, error) {
-	res, err := m.pb.Health(ctx, new(pb.HealthRequest))
+func (m *Muscat) GetInputMethod(ctx context.Context) (string, error) {
+	res, err := m.pb.GetInputMethod(ctx, new(pb.GetInputMethodRequest))
 	if err != nil {
-		return 0, fmt.Errorf("m.pb.Health: %w", err)
+		return "", fmt.Errorf("m.pb.GetInputMethod: %w", err)
 	}
-	return int(res.GetPid()), nil
+	return res.GetId(), nil
 }
 
-func (m *Muscat) Close() error {
-	if err := m.conn.Close(); err != nil {
-		return fmt.Errorf("m.conn.Close: %w", err)
+func (m *Muscat) SetInputMethod(ctx context.Context, id string) error {
+	if _, err := m.pb.SetInputMethod(ctx, &pb.SetInputMethodRequest{Id: id}); err != nil {
+		return fmt.Errorf("m.pb.SetInputMethod: %w", err)
 	}
 	return nil
 }

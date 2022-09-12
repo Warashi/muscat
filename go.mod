@@ -11,6 +11,7 @@ require (
 )
 
 require (
+	github.com/Warashi/go-swim v0.0.0-20220912004113-c27df28655cf // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect

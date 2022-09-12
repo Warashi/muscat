@@ -25,9 +25,26 @@ message HealthResponse {
   int64 pid = 1;
 }
 
+message GetInputMethodRequest { }
+
+message GetInputMethodResponse {
+  string id = 1;
+}
+
+message SetInputMethodRequest {
+  string id = 1;
+}
+
+message SetInputMethodResponse { }
+
 service Muscat {
+  rpc Health(HealthRequest) returns (HealthResponse);
+
   rpc Open(OpenRequest) returns (OpenResponse);
+
   rpc Copy(stream CopyRequest) returns (CopyResponse);
   rpc Paste(PasteRequest) returns (stream PasteResponse);
-  rpc Health(HealthRequest) returns (HealthResponse);
+
+  rpc GetInputMethod(GetInputMethodRequest) returns (GetInputMethodResponse);
+  rpc SetInputMethod(SetInputMethodRequest) returns (SetInputMethodResponse);
 }
