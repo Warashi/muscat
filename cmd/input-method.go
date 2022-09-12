@@ -31,9 +31,16 @@ import (
 	"github.com/Warashi/muscat/client"
 )
 
-// getInputMethodCmd represents the get-im command
+// inputMethodCmd represents the input-method command
+var inputMethodCmd = &cobra.Command{
+	Use:   "input-method",
+	Short: "get/set input method",
+	Long:  "commands to get or set current input method",
+}
+
+// getInputMethodCmd represents the input-method get command
 var getInputMethodCmd = &cobra.Command{
-	Use:   "get-im",
+	Use:   "get",
 	Short: "get input method of server host",
 	Long:  `get input method of server host`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -49,9 +56,9 @@ var getInputMethodCmd = &cobra.Command{
 	},
 }
 
-// setInputMethodCmd represents the set-im command
+// setInputMethodCmd represents the input-method set command
 var setInputMethodCmd = &cobra.Command{
-	Use:   "set-im",
+	Use:   "set",
 	Short: "set input method of server host",
 	Long:  `set input method of server host`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -66,8 +73,9 @@ var setInputMethodCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(getInputMethodCmd)
-	rootCmd.AddCommand(setInputMethodCmd)
+	rootCmd.AddCommand(inputMethodCmd)
+	inputMethodCmd.AddCommand(getInputMethodCmd)
+	inputMethodCmd.AddCommand(setInputMethodCmd)
 
 	// Here you will define your flags and configuration settings.
 
