@@ -9,6 +9,7 @@ import (
 	"os"
 	"sync"
 
+	"github.com/Warashi/go-swim"
 	"github.com/skratchdot/open-golang/open"
 
 	"github.com/Warashi/muscat/pb"
@@ -27,6 +28,10 @@ type Muscat struct {
 
 func newPasteResponse(body []byte) *pb.PasteResponse {
 	return &pb.PasteResponse{Body: body}
+}
+
+func (m *Muscat) Health(context.Context, *pb.HealthRequest) (*pb.HealthResponse, error) {
+	return &pb.HealthResponse{Pid: int64(os.Getpid())}, nil
 }
 
 func (m *Muscat) Open(ctx context.Context, request *pb.OpenRequest) (*pb.OpenResponse, error) {
@@ -75,6 +80,17 @@ func (m *Muscat) Paste(_ *pb.PasteRequest, s pb.Muscat_PasteServer) error {
 	return nil
 }
 
-func (m *Muscat) Health(context.Context, *pb.HealthRequest) (*pb.HealthResponse, error) {
-	return &pb.HealthResponse{Pid: int64(os.Getpid())}, nil
+func GetInputMethod(ctx context.Context, _ *pb.GetInputMethodRequest) (*pb.GetInputMethodResponse, error) {
+	id, err := swim.Get()
+	if err != nil {
+		return nil, fmt.Errorf("swim.Get: %w", err)
+	}
+	return &pb.GetInputMethodResponse{Id: id}, nil
+}
+
+func SetInputMethod(ctx context.Context, request *pb.SetInputMethodRequest) (*pb.SetInputMethodResponse, error) {
+	if err := swim.Set(request.GetId()); err != nil {
+		return nil, fmt.Errorf("swim.Set: %w", err)
+	}
+	return new(pb.SetInputMethodResponse), nil
 }
