@@ -27,14 +27,19 @@ import (
 	"github.com/Warashi/muscat/cmd"
 )
 
-func main() {
-	switch os.Args[0] {
-	case "xdg-open":
-		os.Args = append([]string{"muscat", "open"}, os.Args[1:]...)
-	case "pbcopy":
-		os.Args = append([]string{"muscat", "copy"}, os.Args[1:]...)
-	case "pbpaste":
-		os.Args = append([]string{"muscat", "paste"}, os.Args[1:]...)
-	}
-	cmd.Execute()
+func _main() chan struct{} {
+	ch := make(chan struct{})
+	go func() {
+		defer close(ch)
+		switch os.Args[0] {
+		case "xdg-open":
+			os.Args = append([]string{"muscat", "open"}, os.Args[1:]...)
+		case "pbcopy":
+			os.Args = append([]string{"muscat", "copy"}, os.Args[1:]...)
+		case "pbpaste":
+			os.Args = append([]string{"muscat", "paste"}, os.Args[1:]...)
+		}
+		cmd.Execute()
+	}()
+	return ch
 }

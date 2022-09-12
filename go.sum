@@ -54,6 +54,12 @@ github.com/Warashi/go-swim v0.0.0-20220912002104-383a8ea41039 h1:3TK0c8HodwPQnGk
 github.com/Warashi/go-swim v0.0.0-20220912002104-383a8ea41039/go.mod h1:gecc3riVnEorsAo2MXYfdqxQr+3ekK2CweDq81BfUsw=
 github.com/Warashi/go-swim v0.0.0-20220912004113-c27df28655cf h1:17ctCrr5K8ABTQd78fxlUuJdHPEmEsbr/HeuLXwHlnc=
 github.com/Warashi/go-swim v0.0.0-20220912004113-c27df28655cf/go.mod h1:gecc3riVnEorsAo2MXYfdqxQr+3ekK2CweDq81BfUsw=
+github.com/Warashi/go-swim v0.0.0-20220912060002-f4d21120bd3a h1:5R49Dvky3J8Tk9+sma+wr/wRwS/bMQx06gxwSRGPyx0=
+github.com/Warashi/go-swim v0.0.0-20220912060002-f4d21120bd3a/go.mod h1:gecc3riVnEorsAo2MXYfdqxQr+3ekK2CweDq81BfUsw=
+github.com/Warashi/go-swim v0.0.0-20220912060542-9bb75bada156 h1:YOchc1qaalqQVFDGzJWQSJByH52P02JL5Mnae6Y08oQ=
+github.com/Warashi/go-swim v0.0.0-20220912060542-9bb75bada156/go.mod h1:gecc3riVnEorsAo2MXYfdqxQr+3ekK2CweDq81BfUsw=
+github.com/Warashi/go-swim v0.0.0-20220912062543-3596431113e5 h1:o3kUZ/qCQFeUradkPTuYd05ylwq7yEBImjedA9/Nuv4=
+github.com/Warashi/go-swim v0.0.0-20220912062543-3596431113e5/go.mod h1:gecc3riVnEorsAo2MXYfdqxQr+3ekK2CweDq81BfUsw=
 github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=
 github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=
 github.com/alecthomas/units v0.0.0-20151022065526-2efee857e7cf/go.mod h1:ybxpYRFXyAe+OPACYpWeL0wqObRcbAqCMya13uyzqw0=
