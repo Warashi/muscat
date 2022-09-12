@@ -80,7 +80,7 @@ func (m *Muscat) Paste(_ *pb.PasteRequest, s pb.Muscat_PasteServer) error {
 	return nil
 }
 
-func GetInputMethod(ctx context.Context, _ *pb.GetInputMethodRequest) (*pb.GetInputMethodResponse, error) {
+func (m *Muscat) GetInputMethod(ctx context.Context, _ *pb.GetInputMethodRequest) (*pb.GetInputMethodResponse, error) {
 	id, err := swim.Get()
 	if err != nil {
 		return nil, fmt.Errorf("swim.Get: %w", err)
@@ -88,7 +88,7 @@ func GetInputMethod(ctx context.Context, _ *pb.GetInputMethodRequest) (*pb.GetIn
 	return &pb.GetInputMethodResponse{Id: id}, nil
 }
 
-func SetInputMethod(ctx context.Context, request *pb.SetInputMethodRequest) (*pb.SetInputMethodResponse, error) {
+func (m *Muscat) SetInputMethod(ctx context.Context, request *pb.SetInputMethodRequest) (*pb.SetInputMethodResponse, error) {
 	if err := swim.Set(request.GetId()); err != nil {
 		return nil, fmt.Errorf("swim.Set: %w", err)
 	}
