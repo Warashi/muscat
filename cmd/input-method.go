@@ -66,9 +66,14 @@ var setInputMethodCmd = &cobra.Command{
 		if err != nil {
 			log.Fatalf("client.New: %v", err)
 		}
-		if err := muscat.SetInputMethod(context.Background(), args[0]); err != nil {
+		if len(args) == 0 {
+			log.Fatalln("please specify input method to set")
+		}
+		before, err := muscat.SetInputMethod(context.Background(), args[0])
+		if err != nil {
 			log.Fatalf("muscat.SetInputMethod: %v", err)
 		}
+		fmt.Println(before)
 	},
 }
 

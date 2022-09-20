@@ -89,8 +89,12 @@ func (m *Muscat) GetInputMethod(ctx context.Context, _ *pb.GetInputMethodRequest
 }
 
 func (m *Muscat) SetInputMethod(ctx context.Context, request *pb.SetInputMethodRequest) (*pb.SetInputMethodResponse, error) {
+	before, err := swim.Get()
+	if err != nil {
+		return nil, fmt.Errorf("swim.Get: %w", err)
+	}
 	if err := swim.Set(request.GetId()); err != nil {
 		return nil, fmt.Errorf("swim.Set: %w", err)
 	}
-	return new(pb.SetInputMethodResponse), nil
+	return &pb.SetInputMethodResponse{Before: before}, nil
 }
