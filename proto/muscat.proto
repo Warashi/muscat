@@ -35,7 +35,9 @@ message SetInputMethodRequest {
   string id = 1;
 }
 
-message SetInputMethodResponse { }
+message SetInputMethodResponse { 
+  string before = 1;
+}
 
 service Muscat {
   rpc Health(HealthRequest) returns (HealthResponse);
