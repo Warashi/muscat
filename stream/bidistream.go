@@ -18,25 +18,30 @@ type BidiReadStream[T ReadResponse] interface {
 type BidiReader[T ReadResponse] struct {
 	stream BidiReadStream[T]
 	buf    []byte
+	closed bool
 }
 
 func (r *BidiReader[T]) Read(p []byte) (n int, err error) {
-	end := false
-	for len(r.buf) < len(p) {
+	if r.closed {
+		n := copy(p, r.buf)
+		r.buf = r.buf[n:]
+		if len(r.buf) == 0 {
+			return n, io.EOF
+		}
+		return n, nil
+	}
+	if len(r.buf) < len(p) {
 		msg, err := r.stream.Receive()
 		if err != nil {
-			if errors.Is(err, io.EOF) {
-				end = true
-				break
+			if !errors.Is(err, io.EOF) {
+				return 0, err
 			}
-			return 0, err
+			// errors.Is(err, io.EOF)
+			r.closed = true
 		}
 		r.buf = append(r.buf, msg.GetBody()...)
 	}
 	n = copy(p, r.buf)
 	r.buf = r.buf[n:]
-	if end && n == 0 {
-		return 0, io.EOF
-	}
 	return n, nil
 }
