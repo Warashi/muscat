@@ -47,6 +47,9 @@ const (
 	// MuscatServiceSetInputMethodProcedure is the fully-qualified name of the MuscatService's
 	// SetInputMethod RPC.
 	MuscatServiceSetInputMethodProcedure = "/dev.warashi.muscat.v1.MuscatService/SetInputMethod"
+	// MuscatServicePortForwardProcedure is the fully-qualified name of the MuscatService's PortForward
+	// RPC.
+	MuscatServicePortForwardProcedure = "/dev.warashi.muscat.v1.MuscatService/PortForward"
 )
 
 // MuscatServiceClient is a client for the dev.warashi.muscat.v1.MuscatService service.
@@ -57,6 +60,10 @@ type MuscatServiceClient interface {
 	Paste(context.Context, *connect.Request[pb.PasteRequest]) (*connect.ServerStreamForClient[pb.PasteResponse], error)
 	GetInputMethod(context.Context, *connect.Request[pb.GetInputMethodRequest]) (*connect.Response[pb.GetInputMethodResponse], error)
 	SetInputMethod(context.Context, *connect.Request[pb.SetInputMethodRequest]) (*connect.Response[pb.SetInputMethodResponse], error)
+	// PortForward is a bidirectional stream.
+	// Forwarded port is send as metadata.
+	// 1 connection is 1 stream.
+	PortForward(context.Context) *connect.BidiStreamForClient[pb.PortForwardRequest, pb.PortForwardResponse]
 }
 
 // NewMuscatServiceClient constructs a client for the dev.warashi.muscat.v1.MuscatService service.
@@ -99,6 +106,11 @@ func NewMuscatServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 			baseURL+MuscatServiceSetInputMethodProcedure,
 			opts...,
 		),
+		portForward: connect.NewClient[pb.PortForwardRequest, pb.PortForwardResponse](
+			httpClient,
+			baseURL+MuscatServicePortForwardProcedure,
+			opts...,
+		),
 	}
 }
 
@@ -110,6 +122,7 @@ type muscatServiceClient struct {
 	paste          *connect.Client[pb.PasteRequest, pb.PasteResponse]
 	getInputMethod *connect.Client[pb.GetInputMethodRequest, pb.GetInputMethodResponse]
 	setInputMethod *connect.Client[pb.SetInputMethodRequest, pb.SetInputMethodResponse]
+	portForward    *connect.Client[pb.PortForwardRequest, pb.PortForwardResponse]
 }
 
 // Health calls dev.warashi.muscat.v1.MuscatService.Health.
@@ -142,6 +155,11 @@ func (c *muscatServiceClient) SetInputMethod(ctx context.Context, req *connect.R
 	return c.setInputMethod.CallUnary(ctx, req)
 }
 
+// PortForward calls dev.warashi.muscat.v1.MuscatService.PortForward.
+func (c *muscatServiceClient) PortForward(ctx context.Context) *connect.BidiStreamForClient[pb.PortForwardRequest, pb.PortForwardResponse] {
+	return c.portForward.CallBidiStream(ctx)
+}
+
 // MuscatServiceHandler is an implementation of the dev.warashi.muscat.v1.MuscatService service.
 type MuscatServiceHandler interface {
 	Health(context.Context, *connect.Request[pb.HealthRequest]) (*connect.Response[pb.HealthResponse], error)
@@ -150,6 +168,10 @@ type MuscatServiceHandler interface {
 	Paste(context.Context, *connect.Request[pb.PasteRequest], *connect.ServerStream[pb.PasteResponse]) error
 	GetInputMethod(context.Context, *connect.Request[pb.GetInputMethodRequest]) (*connect.Response[pb.GetInputMethodResponse], error)
 	SetInputMethod(context.Context, *connect.Request[pb.SetInputMethodRequest]) (*connect.Response[pb.SetInputMethodResponse], error)
+	// PortForward is a bidirectional stream.
+	// Forwarded port is send as metadata.
+	// 1 connection is 1 stream.
+	PortForward(context.Context, *connect.BidiStream[pb.PortForwardRequest, pb.PortForwardResponse]) error
 }
 
 // NewMuscatServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -188,6 +210,11 @@ func NewMuscatServiceHandler(svc MuscatServiceHandler, opts ...connect.HandlerOp
 		svc.SetInputMethod,
 		opts...,
 	)
+	muscatServicePortForwardHandler := connect.NewBidiStreamHandler(
+		MuscatServicePortForwardProcedure,
+		svc.PortForward,
+		opts...,
+	)
 	return "/dev.warashi.muscat.v1.MuscatService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case MuscatServiceHealthProcedure:
@@ -202,6 +229,8 @@ func NewMuscatServiceHandler(svc MuscatServiceHandler, opts ...connect.HandlerOp
 			muscatServiceGetInputMethodHandler.ServeHTTP(w, r)
 		case MuscatServiceSetInputMethodProcedure:
 			muscatServiceSetInputMethodHandler.ServeHTTP(w, r)
+		case MuscatServicePortForwardProcedure:
+			muscatServicePortForwardHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -233,4 +262,8 @@ func (UnimplementedMuscatServiceHandler) GetInputMethod(context.Context, *connec
 
 func (UnimplementedMuscatServiceHandler) SetInputMethod(context.Context, *connect.Request[pb.SetInputMethodRequest]) (*connect.Response[pb.SetInputMethodResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("dev.warashi.muscat.v1.MuscatService.SetInputMethod is not implemented"))
+}
+
+func (UnimplementedMuscatServiceHandler) PortForward(context.Context, *connect.BidiStream[pb.PortForwardRequest, pb.PortForwardResponse]) error {
+	return connect.NewError(connect.CodeUnimplemented, errors.New("dev.warashi.muscat.v1.MuscatService.PortForward is not implemented"))
 }
