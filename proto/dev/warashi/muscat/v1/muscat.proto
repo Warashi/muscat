@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 package dev.warashi.muscat.v1;
-option go_package="github.com/Warashi/muscat/pb";
+option go_package="github.com/Warashi/muscat/v2/pb";
 
 message OpenRequest {
   string uri = 1;

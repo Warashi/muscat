@@ -13,10 +13,10 @@ import (
 	"github.com/Warashi/go-swim"
 	"github.com/skratchdot/open-golang/open"
 
-	"github.com/Warashi/muscat/pb"
-	"github.com/Warashi/muscat/pb/pbconnect"
-	"github.com/Warashi/muscat/server/internal/clipboard"
-	"github.com/Warashi/muscat/stream"
+	"github.com/Warashi/muscat/v2/pb"
+	"github.com/Warashi/muscat/v2/pb/pbconnect"
+	"github.com/Warashi/muscat/v2/server/internal/clipboard"
+	"github.com/Warashi/muscat/v2/stream"
 )
 
 var _ pbconnect.MuscatServiceHandler = (*MuscatServer)(nil)
