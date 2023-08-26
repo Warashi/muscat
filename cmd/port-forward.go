@@ -22,43 +22,49 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"net"
-	"net/http"
-	"os"
+	"context"
+	"log"
+	"sync"
 
 	"github.com/spf13/cobra"
-	"golang.org/x/net/http2"
-	"golang.org/x/net/http2/h2c"
 
-	"github.com/Warashi/muscat/v2/pb/pbconnect"
-	"github.com/Warashi/muscat/v2/server"
+	"github.com/Warashi/muscat/v2/client"
 )
 
-// serverCmd represents the server command
-var serverCmd = &cobra.Command{
-	Use:   "server",
-	Short: "Start server for communicate with remote machine",
-	Long:  `Start rpc server for communicate with client invoked at remote machine`,
+// portForwardCmd represents the port-forward command
+var portForwardCmd = &cobra.Command{
+	Use:   "port-forward",
+	Short: "Forward port of server host to local host",
+	Long:  `Forward port of server host to local host`,
 	Run: func(cmd *cobra.Command, args []string) {
-		defer os.Remove(mustGetSocketPath())
+		muscat := client.New(mustGetSocketPath())
+		var wg sync.WaitGroup
+		for _, arg := range args {
+			arg := arg
 
-		l, err := net.Listen("unix", mustGetSocketPath())
-		if err != nil {
-			cmd.PrintErrf("remove %s and try again\n", mustGetSocketPath())
-			cmd.PrintErrf("net.Listen: %v", err)
-			return
+			wg.Add(1)
+
+			go func() {
+				defer wg.Done()
+				if err := muscat.PortForward(context.Background(), arg); err != nil {
+					log.Printf("failed to port-forward %s: %v", arg, err)
+				}
+			}()
 		}
-
-		mux := http.NewServeMux()
-		mux.Handle(pbconnect.NewMuscatServiceHandler(new(server.MuscatServer)))
-
-		if err := http.Serve(l, h2c.NewHandler(mux, new(http2.Server))); err != nil {
-			cmd.PrintErrf("s.Serve: %v", err)
-			return
-		}
+		wg.Wait()
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(serverCmd)
+	rootCmd.AddCommand(portForwardCmd)
+
+	// Here you will define your flags and configuration settings.
+
+	// Cobra supports Persistent Flags which will work for this command
+	// and all subcommands, e.g.:
+	// copyCmd.PersistentFlags().String("foo", "", "A help for foo")
+
+	// Cobra supports local flags which will only run when this command
+	// is called directly, e.g.:
+	// copyCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
