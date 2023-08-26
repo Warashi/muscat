@@ -9,42 +9,43 @@ import (
 	"os"
 	"sync"
 
+	"connectrpc.com/connect"
 	"github.com/Warashi/go-swim"
 	"github.com/skratchdot/open-golang/open"
 
 	"github.com/Warashi/muscat/pb"
+	"github.com/Warashi/muscat/pb/pbconnect"
 	"github.com/Warashi/muscat/server/internal/clipboard"
 	"github.com/Warashi/muscat/stream"
 )
 
-type Muscat struct {
-	pb.UnimplementedMuscatServer
+var _ pbconnect.MuscatServiceHandler = (*MuscatServer)(nil)
 
+type MuscatServer struct {
 	// mu clipboard用のmutex
 	mu sync.Mutex
 	// clipboard OSのクリップボードが使えないときにここに保持する
 	clipboard []byte
 }
 
-func newPasteResponse(body []byte) *pb.PasteResponse {
-	return &pb.PasteResponse{Body: body}
+// Health implements pbconnect.MuscatServiceHandler.
+func (m *MuscatServer) Health(context.Context, *connect.Request[pb.HealthRequest]) (*connect.Response[pb.HealthResponse], error) {
+	return connect.NewResponse(&pb.HealthResponse{Pid: int64(os.Getpid())}), nil
 }
 
-func (m *Muscat) Health(context.Context, *pb.HealthRequest) (*pb.HealthResponse, error) {
-	return &pb.HealthResponse{Pid: int64(os.Getpid())}, nil
-}
-
-func (m *Muscat) Open(ctx context.Context, request *pb.OpenRequest) (*pb.OpenResponse, error) {
-	if err := open.Run(request.Uri); err != nil {
+// Open implements pbconnect.MuscatServiceHandler.
+func (m *MuscatServer) Open(_ context.Context, req *connect.Request[pb.OpenRequest]) (*connect.Response[pb.OpenResponse], error) {
+	if err := open.Run(req.Msg.GetUri()); err != nil {
 		return nil, fmt.Errorf("open.Run: %w", err)
 	}
-	return new(pb.OpenResponse), nil
+	return connect.NewResponse(new(pb.OpenResponse)), nil
 }
 
-func (m *Muscat) Copy(s pb.Muscat_CopyServer) error {
-	buf, src := new(bytes.Buffer), bufio.NewReader(stream.NewReader[*pb.CopyRequest](s))
+// Copy implements pbconnect.MuscatServiceHandler.
+func (m *MuscatServer) Copy(ctx context.Context, s *connect.ClientStream[pb.CopyRequest]) (*connect.Response[pb.CopyResponse], error) {
+	buf, src := new(bytes.Buffer), bufio.NewReader(stream.NewReader(s))
 	if _, err := io.Copy(buf, src); err != nil {
-		return fmt.Errorf("io.Copy: %w", err)
+		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("io.Copy: %w", err))
 	}
 
 	if clipboard.Unsupported() {
@@ -52,16 +53,17 @@ func (m *Muscat) Copy(s pb.Muscat_CopyServer) error {
 		m.mu.Lock()
 		defer m.mu.Unlock()
 		m.clipboard = buf.Bytes()
-		return nil
+		return connect.NewResponse(new(pb.CopyResponse)), nil
 	}
 	if err := clipboard.Write(buf.Bytes()); err != nil {
-		return fmt.Errorf("clipboard.WriteAll: %w", err)
+		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("clipboard.WriteAll: %w", err))
 	}
-	return nil
+	return connect.NewResponse(new(pb.CopyResponse)), nil
 }
 
-func (m *Muscat) Paste(_ *pb.PasteRequest, s pb.Muscat_PasteServer) error {
-	dst := stream.NewWriter[*pb.PasteResponse](newPasteResponse, s)
+// Paste implements pbconnect.MuscatServiceHandler.
+func (m *MuscatServer) Paste(ctx context.Context, req *connect.Request[pb.PasteRequest], s *connect.ServerStream[pb.PasteResponse]) error {
+	dst := stream.NewWriter(func(body []byte) *pb.PasteResponse { return &pb.PasteResponse{Body: body} }, s)
 	var body []byte
 	if clipboard.Unsupported() {
 		m.mu.Lock()
@@ -80,21 +82,23 @@ func (m *Muscat) Paste(_ *pb.PasteRequest, s pb.Muscat_PasteServer) error {
 	return nil
 }
 
-func (m *Muscat) GetInputMethod(ctx context.Context, _ *pb.GetInputMethodRequest) (*pb.GetInputMethodResponse, error) {
+// GetInputMethod implements pbconnect.MuscatServiceHandler.
+func (*MuscatServer) GetInputMethod(ctx context.Context, req *connect.Request[pb.GetInputMethodRequest]) (*connect.Response[pb.GetInputMethodResponse], error) {
 	id, err := swim.Get()
 	if err != nil {
-		return nil, fmt.Errorf("swim.Get: %w", err)
+		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("swim.Get: %w", err))
 	}
-	return &pb.GetInputMethodResponse{Id: id}, nil
+	return connect.NewResponse(&pb.GetInputMethodResponse{Id: id}), nil
 }
 
-func (m *Muscat) SetInputMethod(ctx context.Context, request *pb.SetInputMethodRequest) (*pb.SetInputMethodResponse, error) {
+// SetInputMethod implements pbconnect.MuscatServiceHandler.
+func (*MuscatServer) SetInputMethod(ctx context.Context, req *connect.Request[pb.SetInputMethodRequest]) (*connect.Response[pb.SetInputMethodResponse], error) {
 	before, err := swim.Get()
 	if err != nil {
-		return nil, fmt.Errorf("swim.Get: %w", err)
+		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("swim.Get: %w", err))
 	}
-	if err := swim.Set(request.GetId()); err != nil {
-		return nil, fmt.Errorf("swim.Set: %w", err)
+	if err := swim.Set(req.Msg.GetId()); err != nil {
+		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("swim.Set: %w", err))
 	}
-	return &pb.SetInputMethodResponse{Before: before}, nil
+	return connect.NewResponse(&pb.SetInputMethodResponse{Before: before}), nil
 }

@@ -44,10 +44,7 @@ var getInputMethodCmd = &cobra.Command{
 	Short: "get input method of server host",
 	Long:  `get input method of server host`,
 	Run: func(cmd *cobra.Command, args []string) {
-		muscat, err := client.New(mustGetSocketPath())
-		if err != nil {
-			log.Fatalf("client.New: %v", err)
-		}
+		muscat := client.New(mustGetSocketPath())
 		id, err := muscat.GetInputMethod(context.Background())
 		if err != nil {
 			log.Fatalf("muscat.GetInputMethod: %v", err)
@@ -62,10 +59,7 @@ var setInputMethodCmd = &cobra.Command{
 	Short: "set input method of server host",
 	Long:  `set input method of server host`,
 	Run: func(cmd *cobra.Command, args []string) {
-		muscat, err := client.New(mustGetSocketPath())
-		if err != nil {
-			log.Fatalf("client.New: %v", err)
-		}
+		muscat := client.New(mustGetSocketPath())
 		if len(args) == 0 {
 			log.Fatalln("please specify input method to set")
 		}

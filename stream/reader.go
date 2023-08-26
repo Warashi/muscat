@@ -1,11 +1,6 @@
 package stream
 
-import (
-	"bytes"
-	"errors"
-	"fmt"
-	"io"
-)
+import "io"
 
 func NewReader[T ReadResponse](stream ReadStream[T]) *Reader[T] {
 	return &Reader[T]{
@@ -18,26 +13,28 @@ type ReadResponse interface {
 }
 
 type ReadStream[T ReadResponse] interface {
-	Recv() (T, error)
+	Receive() bool
+	Msg() T
 }
 
 type Reader[T ReadResponse] struct {
 	stream ReadStream[T]
-	buffer bytes.Buffer
+	buf    []byte
 }
 
 func (r *Reader[T]) Read(p []byte) (n int, err error) {
-	for r.buffer.Len() < len(p) {
-		b, err := r.stream.Recv()
-		if err != nil {
-			if errors.Is(err, io.EOF) {
-				break
-			}
-			return 0, fmt.Errorf("r.stream.Recv: %w", err)
+	end := false
+	for len(r.buf) < len(p) {
+		if !r.stream.Receive() {
+			end = true
+			break
 		}
-		if _, err := r.buffer.Write(b.GetBody()); err != nil {
-			return 0, fmt.Errorf("r.buffer.Write: %w", err)
-		}
+		r.buf = append(r.buf, r.stream.Msg().GetBody()...)
 	}
-	return r.buffer.Read(p)
+	n = copy(p, r.buf)
+	r.buf = r.buf[n:]
+	if end {
+		return n, io.EOF
+	}
+	return n, nil
 }

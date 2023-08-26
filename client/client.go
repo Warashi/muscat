@@ -7,13 +7,14 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"net/http"
 	"net/url"
 	"os"
 
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
+	"connectrpc.com/connect"
 
 	"github.com/Warashi/muscat/pb"
+	"github.com/Warashi/muscat/pb/pbconnect"
 	"github.com/Warashi/muscat/stream"
 )
 
@@ -25,26 +26,12 @@ func init() {
 	}
 }
 
-func socketDialer(ctx context.Context, addr string) (net.Conn, error) {
-	var d net.Dialer
-	return d.DialContext(ctx, "unix", addr)
+func New(socketPath string) *MuscatClient {
+	return &MuscatClient{pb: pbconnect.NewMuscatServiceClient(http.DefaultClient, "unix://"+socketPath)}
 }
 
-func newCopyRequest(body []byte) *pb.CopyRequest {
-	return &pb.CopyRequest{Body: body}
-}
-
-func New(socketPath string) (*Muscat, error) {
-	conn, err := grpc.Dial(socketPath, grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithContextDialer(socketDialer))
-	if err != nil {
-		return nil, fmt.Errorf("grpc.Dial: %w", err)
-	}
-	return &Muscat{pb: pb.NewMuscatClient(conn), conn: conn}, nil
-}
-
-type Muscat struct {
-	pb   pb.MuscatClient
-	conn io.Closer
+type MuscatClient struct {
+	pb pbconnect.MuscatServiceClient
 }
 
 func replaceLoopback(uri string) (s string) {
@@ -81,68 +68,59 @@ func replaceLoopback(uri string) (s string) {
 	return uri
 }
 
-func (m *Muscat) Health(ctx context.Context) (int, error) {
-	res, err := m.pb.Health(ctx, new(pb.HealthRequest))
+func (m *MuscatClient) Health(ctx context.Context) (int, error) {
+	res, err := m.pb.Health(ctx, connect.NewRequest(new(pb.HealthRequest)))
 	if err != nil {
 		return 0, fmt.Errorf("m.pb.Health: %w", err)
 	}
-	return int(res.GetPid()), nil
+	return int(res.Msg.GetPid()), nil
 }
 
-func (m *Muscat) Close() error {
-	if err := m.conn.Close(); err != nil {
-		return fmt.Errorf("m.conn.Close: %w", err)
-	}
-	return nil
-}
-
-func (m *Muscat) Open(ctx context.Context, uri string) error {
+func (m *MuscatClient) Open(ctx context.Context, uri string) error {
 	uri = replaceLoopback(uri)
-	if _, err := m.pb.Open(ctx, &pb.OpenRequest{Uri: uri}); err != nil {
+	if _, err := m.pb.Open(ctx, connect.NewRequest(&pb.OpenRequest{Uri: uri})); err != nil {
 		return fmt.Errorf("m.pb.Open: %w", err)
 	}
 	return nil
 }
 
-func (m *Muscat) Copy(ctx context.Context, r io.Reader) error {
-	s, err := m.pb.Copy(ctx)
-	if err != nil {
-		return fmt.Errorf("m.pb.Copy: %w", err)
-	}
-
-	dst, src := bufio.NewWriter(stream.NewWriter[*pb.CopyRequest](newCopyRequest, s)), bufio.NewReader(r)
+func (m *MuscatClient) Copy(ctx context.Context, r io.Reader) (err error) {
+	s := m.pb.Copy(ctx)
+	defer func() {
+		if _, closeErr := s.CloseAndReceive(); closeErr != nil && !errors.Is(closeErr, io.EOF) {
+			err = errors.Join(err, fmt.Errorf("stream.CloseAndRecv: %w", err))
+		}
+	}()
+	dst, src := bufio.NewWriter(stream.NewWriter(func(body []byte) *pb.CopyRequest { return &pb.CopyRequest{Body: body} }, s)), bufio.NewReader(r)
 	if _, err := io.Copy(dst, src); err != nil {
 		return fmt.Errorf("io.Copy: %w", err)
 	}
 	if err := dst.Flush(); err != nil {
 		return fmt.Errorf("dst.Flush: %w", err)
 	}
-	if _, err := s.CloseAndRecv(); err != nil && !errors.Is(err, io.EOF) {
-		return fmt.Errorf("stream.CloseAndRecv: %w", err)
-	}
 	return nil
 }
 
-func (m *Muscat) Paste(ctx context.Context) (io.Reader, error) {
-	s, err := m.pb.Paste(ctx, new(pb.PasteRequest))
+func (m *MuscatClient) Paste(ctx context.Context) (io.Reader, error) {
+	s, err := m.pb.Paste(ctx, connect.NewRequest(new(pb.PasteRequest)))
 	if err != nil {
 		return nil, fmt.Errorf("m.pb.Paste: %w", err)
 	}
-	return bufio.NewReader(stream.NewReader[*pb.PasteResponse](s)), nil
+	return bufio.NewReader(stream.NewReader(s)), nil
 }
 
-func (m *Muscat) GetInputMethod(ctx context.Context) (string, error) {
-	res, err := m.pb.GetInputMethod(ctx, new(pb.GetInputMethodRequest))
+func (m *MuscatClient) GetInputMethod(ctx context.Context) (string, error) {
+	res, err := m.pb.GetInputMethod(ctx, connect.NewRequest(new(pb.GetInputMethodRequest)))
 	if err != nil {
 		return "", fmt.Errorf("m.pb.GetInputMethod: %w", err)
 	}
-	return res.GetId(), nil
+	return res.Msg.GetId(), nil
 }
 
-func (m *Muscat) SetInputMethod(ctx context.Context, id string) (before string, err error) {
-	res, err := m.pb.SetInputMethod(ctx, &pb.SetInputMethodRequest{Id: id})
+func (m *MuscatClient) SetInputMethod(ctx context.Context, id string) (before string, err error) {
+	res, err := m.pb.SetInputMethod(ctx, connect.NewRequest(&pb.SetInputMethodRequest{Id: id}))
 	if err != nil {
 		return "", fmt.Errorf("m.pb.SetInputMethod: %w", err)
 	}
-	return res.GetBefore(), nil
+	return res.Msg.GetBefore(), nil
 }
