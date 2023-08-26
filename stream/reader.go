@@ -33,8 +33,8 @@ func (r *Reader[T]) Read(p []byte) (n int, err error) {
 	}
 	n = copy(p, r.buf)
 	r.buf = r.buf[n:]
-	if end {
-		return n, io.EOF
+	if end && n == 0 {
+		return 0, io.EOF
 	}
 	return n, nil
 }
