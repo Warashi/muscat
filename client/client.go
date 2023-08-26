@@ -27,7 +27,13 @@ func init() {
 }
 
 func New(socketPath string) *MuscatClient {
-	return &MuscatClient{pb: pbconnect.NewMuscatServiceClient(http.DefaultClient, "unix://"+socketPath)}
+	client := new(http.Client)
+	client.Transport = &http.Transport{
+		DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
+			return net.Dial("unix", socketPath)
+		},
+	}
+	return &MuscatClient{pb: pbconnect.NewMuscatServiceClient(client, "http://localhost")}
 }
 
 type MuscatClient struct {
