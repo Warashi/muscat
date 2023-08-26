@@ -118,25 +118,27 @@ func (*MuscatServer) PortForward(ctx context.Context, s *connect.BidiStream[pb.P
 	}
 	defer conn.Close()
 
-	var wg sync.WaitGroup
-	wg.Add(2)
+	send, recv := make(chan struct{}), make(chan struct{})
 
 	go func() {
-		defer wg.Done()
+		defer close(send)
 		dst := stream.NewWriter(func(body []byte) *pb.PortForwardResponse { return &pb.PortForwardResponse{Body: body} }, s)
 		if _, err := io.Copy(dst, conn); err != nil {
 			log.Printf("io.Copy: %v\n", err)
 		}
 	}()
 	go func() {
-		defer wg.Done()
+		defer close(recv)
 		src := stream.NewBidiReader(s)
 		if _, err := io.Copy(conn, src); err != nil {
 			log.Printf("io.Copy: %v\n", err)
 		}
 	}()
 
-	wg.Wait()
+	select {
+	case <-send:
+	case <-recv:
+	}
 
 	return nil
 }
