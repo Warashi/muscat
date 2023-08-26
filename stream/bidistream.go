@@ -1,6 +1,9 @@
 package stream
 
-import "io"
+import (
+	"errors"
+	"io"
+)
 
 func NewBidiReader[T ReadResponse](stream BidiReadStream[T]) *BidiReader[T] {
 	return &BidiReader[T]{
@@ -22,6 +25,10 @@ func (r *BidiReader[T]) Read(p []byte) (n int, err error) {
 	for len(r.buf) < len(p) {
 		msg, err := r.stream.Receive()
 		if err != nil {
+			if errors.Is(err, io.EOF) {
+				end = true
+				break
+			}
 			return 0, err
 		}
 		r.buf = append(r.buf, msg.GetBody()...)

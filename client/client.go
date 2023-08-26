@@ -3,6 +3,7 @@ package client
 import (
 	"bufio"
 	"context"
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"io"
@@ -13,6 +14,7 @@ import (
 	"os"
 
 	"connectrpc.com/connect"
+	"golang.org/x/net/http2"
 
 	"github.com/Warashi/muscat/v2/consts"
 	"github.com/Warashi/muscat/v2/pb"
@@ -30,9 +32,10 @@ func init() {
 
 func New(socketPath string) *MuscatClient {
 	client := new(http.Client)
-	client.Transport = &http.Transport{
-		DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
-			return net.Dial("unix", socketPath)
+	client.Transport = &http2.Transport{
+		AllowHTTP: true,
+		DialTLSContext: func(ctx context.Context, network, addr string, cfg *tls.Config) (net.Conn, error) {
+			return (new(net.Dialer)).DialContext(ctx, "unix", socketPath)
 		},
 	}
 	return &MuscatClient{pb: pbconnect.NewMuscatServiceClient(client, "http://localhost", connect.WithSendGzip())}
@@ -138,6 +141,7 @@ func (m *MuscatClient) PortForward(ctx context.Context, port string) error {
 	if err != nil {
 		return fmt.Errorf("net.Listen: %w", err)
 	}
+	defer l.Close()
 
 	for {
 		conn, err := l.Accept()
@@ -157,12 +161,15 @@ func (m *MuscatClient) PortForward(ctx context.Context, port string) error {
 func (m *MuscatClient) portForward(ctx context.Context, port string, conn net.Conn) (err error) {
 	s := m.pb.PortForward(ctx)
 
+	s.RequestHeader().Set(consts.HeaderNameMuscatForwardedPort, port)
+	s.Send(nil)
+
 	send, recv := make(chan struct{}), make(chan struct{})
 
 	go func() {
 		defer close(send)
 		defer s.CloseRequest()
-		s.RequestHeader().Set(consts.HeaderNameMuscatForwardedPort, port)
+
 		dst := stream.NewWriter(func(body []byte) *pb.PortForwardRequest { return &pb.PortForwardRequest{Body: body} }, s)
 		if _, err := io.Copy(dst, conn); err != nil {
 			log.Printf("io.Copy: %v", err)
@@ -171,6 +178,7 @@ func (m *MuscatClient) portForward(ctx context.Context, port string, conn net.Co
 	go func() {
 		defer close(recv)
 		defer s.CloseResponse()
+
 		src := stream.NewBidiReader(s)
 		if _, err := io.Copy(conn, src); err != nil {
 			log.Printf("io.Copy: %v", err)

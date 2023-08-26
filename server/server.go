@@ -108,7 +108,6 @@ func (*MuscatServer) SetInputMethod(ctx context.Context, req *connect.Request[pb
 
 // PortForward implements pbconnect.MuscatServiceHandler.
 func (*MuscatServer) PortForward(ctx context.Context, s *connect.BidiStream[pb.PortForwardRequest, pb.PortForwardResponse]) error {
-	log.Println("accepted")
 	port := s.RequestHeader().Get(consts.HeaderNameMuscatForwardedPort)
 	if port == "" {
 		return connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("port is empty"))

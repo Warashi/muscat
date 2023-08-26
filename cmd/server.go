@@ -27,6 +27,8 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
 
 	"github.com/Warashi/muscat/v2/pb/pbconnect"
 	"github.com/Warashi/muscat/v2/server"
@@ -44,11 +46,13 @@ var serverCmd = &cobra.Command{
 		if err != nil {
 			cmd.PrintErrf("remove %s and try again\n", mustGetSocketPath())
 			cmd.PrintErrf("net.Listen: %v", err)
+			return
 		}
 
-		http.Handle(pbconnect.NewMuscatServiceHandler(new(server.MuscatServer)))
+		mux := http.NewServeMux()
+		mux.Handle(pbconnect.NewMuscatServiceHandler(new(server.MuscatServer)))
 
-		if err := http.Serve(l, nil); err != nil {
+		if err := http.Serve(l, h2c.NewHandler(mux, new(http2.Server))); err != nil {
 			cmd.PrintErrf("s.Serve: %v", err)
 			return
 		}
