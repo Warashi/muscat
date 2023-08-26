@@ -29,7 +29,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/Warashi/muscat/client"
+	"github.com/Warashi/muscat/v2/client"
 )
 
 // pasteCmd represents the paste command

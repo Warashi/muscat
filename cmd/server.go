@@ -28,8 +28,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/Warashi/muscat/pb/pbconnect"
-	"github.com/Warashi/muscat/server"
+	"github.com/Warashi/muscat/v2/pb/pbconnect"
+	"github.com/Warashi/muscat/v2/server"
 )
 
 // serverCmd represents the server command

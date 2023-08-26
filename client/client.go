@@ -13,9 +13,9 @@ import (
 
 	"connectrpc.com/connect"
 
-	"github.com/Warashi/muscat/pb"
-	"github.com/Warashi/muscat/pb/pbconnect"
-	"github.com/Warashi/muscat/stream"
+	"github.com/Warashi/muscat/v2/pb"
+	"github.com/Warashi/muscat/v2/pb/pbconnect"
+	"github.com/Warashi/muscat/v2/stream"
 )
 
 var osHostname string

@@ -24,7 +24,7 @@ package main
 import (
 	"os"
 
-	"github.com/Warashi/muscat/cmd"
+	"github.com/Warashi/muscat/v2/cmd"
 )
 
 func _main() chan struct{} {

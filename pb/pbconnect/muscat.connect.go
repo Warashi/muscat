@@ -8,7 +8,7 @@ import (
 	connect "connectrpc.com/connect"
 	context "context"
 	errors "errors"
-	pb "github.com/Warashi/muscat/pb"
+	pb "github.com/Warashi/muscat/v2/pb"
 	http "net/http"
 	strings "strings"
 )
