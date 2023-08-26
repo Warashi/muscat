@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package dev.warashi.muscat;
+package dev.warashi.muscat.v1;
 option go_package="github.com/Warashi/muscat/pb";
 
 message OpenRequest {
@@ -9,14 +9,14 @@ message OpenRequest {
 message OpenResponse {}
 
 message CopyRequest {
-  bytes Body = 1;
+  bytes body = 1;
 }
 
 message CopyResponse {}
 
 message PasteRequest {}
 message PasteResponse {
-  bytes Body = 1;
+  bytes body = 1;
 }
 
 message HealthRequest { }
@@ -39,7 +39,7 @@ message SetInputMethodResponse {
   string before = 1;
 }
 
-service Muscat {
+service MuscatService {
   rpc Health(HealthRequest) returns (HealthResponse);
 
   rpc Open(OpenRequest) returns (OpenResponse);

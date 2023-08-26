@@ -37,10 +37,7 @@ var copyCmd = &cobra.Command{
 	Short: "Copy stdin contents to server host's clipboard",
 	Long:  `Copy contents from stdin to clipboard of server host`,
 	Run: func(cmd *cobra.Command, args []string) {
-		muscat, err := client.New(mustGetSocketPath())
-		if err != nil {
-			log.Fatalf("client.New: %v", err)
-		}
+		muscat := client.New(mustGetSocketPath())
 		if err := muscat.Copy(context.Background(), os.Stdin); err != nil {
 			log.Fatalf("muscat.Copy: %v", err)
 		}
