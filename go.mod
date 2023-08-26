@@ -1,4 +1,4 @@
-module github.com/Warashi/muscat
+module github.com/Warashi/muscat/v2
 
 go 1.21.0
 
