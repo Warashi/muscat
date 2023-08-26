@@ -6,6 +6,8 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log"
+	"net"
 	"os"
 	"sync"
 
@@ -13,6 +15,7 @@ import (
 	"github.com/Warashi/go-swim"
 	"github.com/skratchdot/open-golang/open"
 
+	"github.com/Warashi/muscat/v2/consts"
 	"github.com/Warashi/muscat/v2/pb"
 	"github.com/Warashi/muscat/v2/pb/pbconnect"
 	"github.com/Warashi/muscat/v2/server/internal/clipboard"
@@ -101,4 +104,42 @@ func (*MuscatServer) SetInputMethod(ctx context.Context, req *connect.Request[pb
 		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("swim.Set: %w", err))
 	}
 	return connect.NewResponse(&pb.SetInputMethodResponse{Before: before}), nil
+}
+
+// PortForward implements pbconnect.MuscatServiceHandler.
+func (*MuscatServer) PortForward(ctx context.Context, s *connect.BidiStream[pb.PortForwardRequest, pb.PortForwardResponse]) error {
+	log.Println("accepted")
+	port := s.RequestHeader().Get(consts.HeaderNameMuscatForwardedPort)
+	if port == "" {
+		return connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("port is empty"))
+	}
+	conn, err := net.Dial("tcp", net.JoinHostPort("localhost", port))
+	if err != nil {
+		return connect.NewError(connect.CodeInternal, fmt.Errorf("net.Dial: %w", err))
+	}
+	defer conn.Close()
+
+	send, recv := make(chan struct{}), make(chan struct{})
+
+	go func() {
+		defer close(send)
+		dst := stream.NewWriter(func(body []byte) *pb.PortForwardResponse { return &pb.PortForwardResponse{Body: body} }, s)
+		if _, err := io.Copy(dst, conn); err != nil {
+			log.Printf("io.Copy: %v\n", err)
+		}
+	}()
+	go func() {
+		defer close(recv)
+		src := stream.NewBidiReader(s)
+		if _, err := io.Copy(conn, src); err != nil {
+			log.Printf("io.Copy: %v\n", err)
+		}
+	}()
+
+	select {
+	case <-send:
+	case <-recv:
+	}
+
+	return nil
 }

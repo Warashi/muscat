@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net"
 	"net/http"
 	"net/url"
@@ -13,6 +14,7 @@ import (
 
 	"connectrpc.com/connect"
 
+	"github.com/Warashi/muscat/v2/consts"
 	"github.com/Warashi/muscat/v2/pb"
 	"github.com/Warashi/muscat/v2/pb/pbconnect"
 	"github.com/Warashi/muscat/v2/stream"
@@ -33,7 +35,7 @@ func New(socketPath string) *MuscatClient {
 			return net.Dial("unix", socketPath)
 		},
 	}
-	return &MuscatClient{pb: pbconnect.NewMuscatServiceClient(client, "http://localhost")}
+	return &MuscatClient{pb: pbconnect.NewMuscatServiceClient(client, "http://localhost", connect.WithSendGzip())}
 }
 
 type MuscatClient struct {
@@ -129,4 +131,56 @@ func (m *MuscatClient) SetInputMethod(ctx context.Context, id string) (before st
 		return "", fmt.Errorf("m.pb.SetInputMethod: %w", err)
 	}
 	return res.Msg.GetBefore(), nil
+}
+
+func (m *MuscatClient) PortForward(ctx context.Context, port string) error {
+	l, err := net.Listen("tcp", net.JoinHostPort("localhost", port))
+	if err != nil {
+		return fmt.Errorf("net.Listen: %w", err)
+	}
+
+	for {
+		conn, err := l.Accept()
+		if err != nil {
+			log.Printf("l.Accept: %v", err)
+			continue
+		}
+		go func() {
+			defer conn.Close()
+			if err := m.portForward(ctx, port, conn); err != nil {
+				log.Printf("m.portForward: %v", err)
+			}
+		}()
+	}
+}
+
+func (m *MuscatClient) portForward(ctx context.Context, port string, conn net.Conn) (err error) {
+	s := m.pb.PortForward(ctx)
+
+	send, recv := make(chan struct{}), make(chan struct{})
+
+	go func() {
+		defer close(send)
+		defer s.CloseRequest()
+		s.RequestHeader().Set(consts.HeaderNameMuscatForwardedPort, port)
+		dst := stream.NewWriter(func(body []byte) *pb.PortForwardRequest { return &pb.PortForwardRequest{Body: body} }, s)
+		if _, err := io.Copy(dst, conn); err != nil {
+			log.Printf("io.Copy: %v", err)
+		}
+	}()
+	go func() {
+		defer close(recv)
+		defer s.CloseResponse()
+		src := stream.NewBidiReader(s)
+		if _, err := io.Copy(conn, src); err != nil {
+			log.Printf("io.Copy: %v", err)
+		}
+	}()
+
+	select {
+	case <-send:
+	case <-recv:
+	}
+
+	return nil
 }
