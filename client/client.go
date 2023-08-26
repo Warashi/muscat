@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"sync"
 
 	"connectrpc.com/connect"
 	"golang.org/x/net/http2"
@@ -164,10 +165,11 @@ func (m *MuscatClient) portForward(ctx context.Context, port string, conn net.Co
 	s.RequestHeader().Set(consts.HeaderNameMuscatForwardedPort, port)
 	s.Send(nil)
 
-	send, recv := make(chan struct{}), make(chan struct{})
+	var wg sync.WaitGroup
+	wg.Add(2)
 
 	go func() {
-		defer close(send)
+		defer wg.Done()
 		defer s.CloseRequest()
 
 		dst := stream.NewWriter(func(body []byte) *pb.PortForwardRequest { return &pb.PortForwardRequest{Body: body} }, s)
@@ -176,7 +178,7 @@ func (m *MuscatClient) portForward(ctx context.Context, port string, conn net.Co
 		}
 	}()
 	go func() {
-		defer close(recv)
+		defer wg.Done()
 		defer s.CloseResponse()
 
 		src := stream.NewBidiReader(s)
@@ -185,10 +187,7 @@ func (m *MuscatClient) portForward(ctx context.Context, port string, conn net.Co
 		}
 	}()
 
-	select {
-	case <-send:
-	case <-recv:
-	}
+	wg.Wait()
 
 	return nil
 }
