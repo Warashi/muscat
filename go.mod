@@ -1,6 +1,6 @@
 module github.com/Warashi/muscat/v2
 
-go 1.21.2
+go 1.21.1
 
 require (
 	connectrpc.com/connect v1.11.1
