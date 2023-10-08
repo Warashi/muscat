@@ -1,6 +1,6 @@
 module github.com/Warashi/muscat/v2
 
-go 1.21.0
+go 1.21.2
 
 require (
 	connectrpc.com/connect v1.11.1
@@ -9,6 +9,7 @@ require (
 	github.com/skratchdot/open-golang v0.0.0-20200116055534-eef842397966
 	github.com/spf13/cobra v1.3.0
 	golang.design/x/clipboard v0.6.2
+	golang.org/x/net v0.14.0
 	google.golang.org/protobuf v1.31.0
 )
 
@@ -18,7 +19,6 @@ require (
 	golang.org/x/exp v0.0.0-20200224162631-6cc2880d07d6 // indirect
 	golang.org/x/image v0.5.0 // indirect
 	golang.org/x/mobile v0.0.0-20210716004757-34ab1303b554 // indirect
-	golang.org/x/net v0.14.0 // indirect
 	golang.org/x/sys v0.11.0 // indirect
 	golang.org/x/text v0.12.0 // indirect
 )
