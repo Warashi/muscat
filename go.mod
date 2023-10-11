@@ -9,7 +9,7 @@ require (
 	github.com/skratchdot/open-golang v0.0.0-20200116055534-eef842397966
 	github.com/spf13/cobra v1.7.0
 	golang.design/x/clipboard v0.7.0
-	golang.org/x/net v0.16.0
+	golang.org/x/net v0.17.0
 	google.golang.org/protobuf v1.31.0
 )
 
