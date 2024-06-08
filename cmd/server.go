@@ -22,6 +22,7 @@ THE SOFTWARE.
 package cmd
 
 import (
+	"context"
 	"net"
 	"net/http"
 	"os"
@@ -40,11 +41,16 @@ var serverCmd = &cobra.Command{
 	Short: "Start server for communicate with remote machine",
 	Long:  `Start rpc server for communicate with client invoked at remote machine`,
 	Run: func(cmd *cobra.Command, args []string) {
-		defer os.Remove(mustGetSocketPath())
+		network, addr := mustGetListenArgs(context.Background())
+		if network == "unix" {
+			defer os.Remove(addr)
+		}
 
-		l, err := net.Listen("unix", mustGetSocketPath())
+		l, err := net.Listen(network, addr)
 		if err != nil {
-			cmd.PrintErrf("remove %s and try again\n", mustGetSocketPath())
+			if network == "unix" {
+				cmd.PrintErrf("remove %s and try again\n", addr)
+			}
 			cmd.PrintErrf("net.Listen: %v", err)
 			return
 		}

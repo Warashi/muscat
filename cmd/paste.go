@@ -38,7 +38,7 @@ var pasteCmd = &cobra.Command{
 	Short: "Output clipboard contents to stdout",
 	Long:  `Output clipboard contents of server host to stdout.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		muscat := client.New(mustGetSocketPath())
+		muscat := client.New(mustGetListenArgs(context.Background()))
 		r, err := muscat.Paste(context.Background())
 		if err != nil {
 			log.Fatalf("muscat.Paste: %v", err)
