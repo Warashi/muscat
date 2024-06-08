@@ -6,7 +6,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/Warashi/muscat/v2/config"
 )
@@ -34,10 +33,7 @@ func getConfig(ctx context.Context) (*config.Config, error) {
 }
 
 func parseConfigAddr(addr string) (string, string) {
-	if strings.HasPrefix(addr, ":") {
-		return "unix", addr
-	}
-	if strings.HasPrefix("localhost:", addr) {
+	if filepath.IsAbs(addr) {
 		return "unix", addr
 	}
 	return "tcp", addr
