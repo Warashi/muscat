@@ -37,7 +37,7 @@ var portForwardCmd = &cobra.Command{
 	Short: "Forward port of server host to local host",
 	Long:  `Forward port of server host to local host`,
 	Run: func(cmd *cobra.Command, args []string) {
-		muscat := client.New(mustGetSocketPath())
+		muscat := client.New(mustGetListenArgs(context.Background()))
 		var wg sync.WaitGroup
 		for _, arg := range args {
 			arg := arg

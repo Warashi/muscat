@@ -31,12 +31,12 @@ func init() {
 	}
 }
 
-func New(socketPath string) *MuscatClient {
+func New(network, addr string) *MuscatClient {
 	client := new(http.Client)
 	client.Transport = &http2.Transport{
 		AllowHTTP: true,
-		DialTLSContext: func(ctx context.Context, network, addr string, cfg *tls.Config) (net.Conn, error) {
-			return (new(net.Dialer)).DialContext(ctx, "unix", socketPath)
+		DialTLSContext: func(ctx context.Context, _, _ string, cfg *tls.Config) (net.Conn, error) {
+			return (new(net.Dialer)).DialContext(ctx, network, addr)
 		},
 	}
 	return &MuscatClient{pb: pbconnect.NewMuscatServiceClient(client, "http://localhost", connect.WithSendGzip())}

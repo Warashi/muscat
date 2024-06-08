@@ -37,7 +37,7 @@ var openCmd = &cobra.Command{
 	Long:  `Open URI with default browser at server host`,
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		muscat := client.New(mustGetSocketPath())
+		muscat := client.New(mustGetListenArgs(context.Background()))
 		if err := muscat.Open(context.Background(), args[0]); err != nil {
 			log.Fatalf("muscat.Open: %v", err)
 		}
