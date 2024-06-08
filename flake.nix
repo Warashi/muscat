@@ -13,12 +13,16 @@
   }:
     flake-utils.lib.eachDefaultSystem (system: let
       pkgs = nixpkgs.legacyPackages.${system};
-    in {
-      devShell = pkgs.mkShell {
-       nativeBuildInputs = with pkgs; [
-          go
-          buf
-        ];
-      };
-    });
+    in
+      with pkgs; {
+        packages.default = (callPackage ./package.nix {});
+
+        devShell = mkShell {
+          GOTOOLCHAIN = "local";
+          nativeBuildInputs = [
+            go
+            buf
+          ];
+        };
+      });
 }
