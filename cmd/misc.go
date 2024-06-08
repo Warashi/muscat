@@ -34,10 +34,10 @@ func getConfig(ctx context.Context) (*config.Config, error) {
 }
 
 func parseConfigAddr(addr string) (string, string) {
-	if strings.HasPrefix(":", addr) {
+	if strings.HasPrefix(addr, ":") {
 		return "unix", addr
 	}
-	if strings.HasPrefix(addr, "localhost:") {
+	if strings.HasPrefix("localhost:", addr) {
 		return "unix", addr
 	}
 	return "tcp", addr
