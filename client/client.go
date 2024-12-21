@@ -16,6 +16,7 @@ import (
 
 	"connectrpc.com/connect"
 	"golang.org/x/net/http2"
+	"google.golang.org/protobuf/proto"
 
 	"github.com/Warashi/muscat/v2/consts"
 	"github.com/Warashi/muscat/v2/pb"
@@ -90,7 +91,7 @@ func (m *MuscatClient) Health(ctx context.Context) (int, error) {
 
 func (m *MuscatClient) Open(ctx context.Context, uri string) error {
 	uri = replaceLoopback(uri)
-	if _, err := m.pb.Open(ctx, connect.NewRequest(&pb.OpenRequest{Uri: uri})); err != nil {
+	if _, err := m.pb.Open(ctx, connect.NewRequest(pb.OpenRequest_builder{Uri: proto.String(uri)}.Build())); err != nil {
 		return fmt.Errorf("m.pb.Open: %w", err)
 	}
 	return nil
@@ -103,7 +104,7 @@ func (m *MuscatClient) Copy(ctx context.Context, r io.Reader) (err error) {
 			err = errors.Join(err, fmt.Errorf("stream.CloseAndRecv: %w", err))
 		}
 	}()
-	dst, src := bufio.NewWriter(stream.NewWriter(func(body []byte) *pb.CopyRequest { return &pb.CopyRequest{Body: body} }, s)), bufio.NewReader(r)
+	dst, src := bufio.NewWriter(stream.NewWriter(func(body []byte) *pb.CopyRequest { return pb.CopyRequest_builder{Body: body}.Build() }, s)), bufio.NewReader(r)
 	if _, err := io.Copy(dst, src); err != nil {
 		return fmt.Errorf("io.Copy: %w", err)
 	}
@@ -130,7 +131,7 @@ func (m *MuscatClient) GetInputMethod(ctx context.Context) (string, error) {
 }
 
 func (m *MuscatClient) SetInputMethod(ctx context.Context, id string) (before string, err error) {
-	res, err := m.pb.SetInputMethod(ctx, connect.NewRequest(&pb.SetInputMethodRequest{Id: id}))
+	res, err := m.pb.SetInputMethod(ctx, connect.NewRequest(pb.SetInputMethodRequest_builder{Id: proto.String(id)}.Build()))
 	if err != nil {
 		return "", fmt.Errorf("m.pb.SetInputMethod: %w", err)
 	}
@@ -172,7 +173,7 @@ func (m *MuscatClient) portForward(ctx context.Context, port string, conn net.Co
 		defer wg.Done()
 		defer s.CloseRequest()
 
-		dst := stream.NewWriter(func(body []byte) *pb.PortForwardRequest { return &pb.PortForwardRequest{Body: body} }, s)
+		dst := stream.NewWriter(func(body []byte) *pb.PortForwardRequest { return pb.PortForwardRequest_builder{Body: body}.Build() }, s)
 		if _, err := io.Copy(dst, conn); err != nil {
 			log.Printf("io.Copy: %v", err)
 		}
