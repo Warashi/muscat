@@ -18,7 +18,7 @@ import (
 // generated with a version of connect newer than the one compiled into your binary. You can fix the
 // problem by either regenerating this code with an older version of connect or updating the connect
 // version compiled into your binary.
-const _ = connect.IsAtLeastVersion0_1_0
+const _ = connect.IsAtLeastVersion1_13_0
 
 const (
 	// MuscatServiceName is the fully-qualified name of the MuscatService service.
@@ -52,6 +52,18 @@ const (
 	MuscatServicePortForwardProcedure = "/dev.warashi.muscat.v1.MuscatService/PortForward"
 )
 
+// These variables are the protoreflect.Descriptor objects for the RPCs defined in this package.
+var (
+	muscatServiceServiceDescriptor              = pb.File_dev_warashi_muscat_v1_muscat_proto.Services().ByName("MuscatService")
+	muscatServiceHealthMethodDescriptor         = muscatServiceServiceDescriptor.Methods().ByName("Health")
+	muscatServiceOpenMethodDescriptor           = muscatServiceServiceDescriptor.Methods().ByName("Open")
+	muscatServiceCopyMethodDescriptor           = muscatServiceServiceDescriptor.Methods().ByName("Copy")
+	muscatServicePasteMethodDescriptor          = muscatServiceServiceDescriptor.Methods().ByName("Paste")
+	muscatServiceGetInputMethodMethodDescriptor = muscatServiceServiceDescriptor.Methods().ByName("GetInputMethod")
+	muscatServiceSetInputMethodMethodDescriptor = muscatServiceServiceDescriptor.Methods().ByName("SetInputMethod")
+	muscatServicePortForwardMethodDescriptor    = muscatServiceServiceDescriptor.Methods().ByName("PortForward")
+)
+
 // MuscatServiceClient is a client for the dev.warashi.muscat.v1.MuscatService service.
 type MuscatServiceClient interface {
 	Health(context.Context, *connect.Request[pb.HealthRequest]) (*connect.Response[pb.HealthResponse], error)
@@ -79,37 +91,44 @@ func NewMuscatServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 		health: connect.NewClient[pb.HealthRequest, pb.HealthResponse](
 			httpClient,
 			baseURL+MuscatServiceHealthProcedure,
-			opts...,
+			connect.WithSchema(muscatServiceHealthMethodDescriptor),
+			connect.WithClientOptions(opts...),
 		),
 		open: connect.NewClient[pb.OpenRequest, pb.OpenResponse](
 			httpClient,
 			baseURL+MuscatServiceOpenProcedure,
-			opts...,
+			connect.WithSchema(muscatServiceOpenMethodDescriptor),
+			connect.WithClientOptions(opts...),
 		),
 		copy: connect.NewClient[pb.CopyRequest, pb.CopyResponse](
 			httpClient,
 			baseURL+MuscatServiceCopyProcedure,
-			opts...,
+			connect.WithSchema(muscatServiceCopyMethodDescriptor),
+			connect.WithClientOptions(opts...),
 		),
 		paste: connect.NewClient[pb.PasteRequest, pb.PasteResponse](
 			httpClient,
 			baseURL+MuscatServicePasteProcedure,
-			opts...,
+			connect.WithSchema(muscatServicePasteMethodDescriptor),
+			connect.WithClientOptions(opts...),
 		),
 		getInputMethod: connect.NewClient[pb.GetInputMethodRequest, pb.GetInputMethodResponse](
 			httpClient,
 			baseURL+MuscatServiceGetInputMethodProcedure,
-			opts...,
+			connect.WithSchema(muscatServiceGetInputMethodMethodDescriptor),
+			connect.WithClientOptions(opts...),
 		),
 		setInputMethod: connect.NewClient[pb.SetInputMethodRequest, pb.SetInputMethodResponse](
 			httpClient,
 			baseURL+MuscatServiceSetInputMethodProcedure,
-			opts...,
+			connect.WithSchema(muscatServiceSetInputMethodMethodDescriptor),
+			connect.WithClientOptions(opts...),
 		),
 		portForward: connect.NewClient[pb.PortForwardRequest, pb.PortForwardResponse](
 			httpClient,
 			baseURL+MuscatServicePortForwardProcedure,
-			opts...,
+			connect.WithSchema(muscatServicePortForwardMethodDescriptor),
+			connect.WithClientOptions(opts...),
 		),
 	}
 }
@@ -183,37 +202,44 @@ func NewMuscatServiceHandler(svc MuscatServiceHandler, opts ...connect.HandlerOp
 	muscatServiceHealthHandler := connect.NewUnaryHandler(
 		MuscatServiceHealthProcedure,
 		svc.Health,
-		opts...,
+		connect.WithSchema(muscatServiceHealthMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
 	)
 	muscatServiceOpenHandler := connect.NewUnaryHandler(
 		MuscatServiceOpenProcedure,
 		svc.Open,
-		opts...,
+		connect.WithSchema(muscatServiceOpenMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
 	)
 	muscatServiceCopyHandler := connect.NewClientStreamHandler(
 		MuscatServiceCopyProcedure,
 		svc.Copy,
-		opts...,
+		connect.WithSchema(muscatServiceCopyMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
 	)
 	muscatServicePasteHandler := connect.NewServerStreamHandler(
 		MuscatServicePasteProcedure,
 		svc.Paste,
-		opts...,
+		connect.WithSchema(muscatServicePasteMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
 	)
 	muscatServiceGetInputMethodHandler := connect.NewUnaryHandler(
 		MuscatServiceGetInputMethodProcedure,
 		svc.GetInputMethod,
-		opts...,
+		connect.WithSchema(muscatServiceGetInputMethodMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
 	)
 	muscatServiceSetInputMethodHandler := connect.NewUnaryHandler(
 		MuscatServiceSetInputMethodProcedure,
 		svc.SetInputMethod,
-		opts...,
+		connect.WithSchema(muscatServiceSetInputMethodMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
 	)
 	muscatServicePortForwardHandler := connect.NewBidiStreamHandler(
 		MuscatServicePortForwardProcedure,
 		svc.PortForward,
-		opts...,
+		connect.WithSchema(muscatServicePortForwardMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
 	)
 	return "/dev.warashi.muscat.v1.MuscatService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
