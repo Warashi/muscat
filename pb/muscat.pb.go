@@ -10,7 +10,6 @@ import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
-	sync "sync"
 )
 
 const (
@@ -21,10 +20,12 @@ const (
 )
 
 type OpenRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Uri           string                 `protobuf:"bytes,1,opt,name=uri,proto3" json:"uri,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Uri         *string                `protobuf:"bytes,1,opt,name=uri" json:"uri,omitempty"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
 }
 
 func (x *OpenRequest) Reset() {
@@ -52,20 +53,52 @@ func (x *OpenRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use OpenRequest.ProtoReflect.Descriptor instead.
-func (*OpenRequest) Descriptor() ([]byte, []int) {
-	return file_dev_warashi_muscat_v1_muscat_proto_rawDescGZIP(), []int{0}
-}
-
 func (x *OpenRequest) GetUri() string {
 	if x != nil {
-		return x.Uri
+		if x.xxx_hidden_Uri != nil {
+			return *x.xxx_hidden_Uri
+		}
+		return ""
 	}
 	return ""
 }
 
+func (x *OpenRequest) SetUri(v string) {
+	x.xxx_hidden_Uri = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 1)
+}
+
+func (x *OpenRequest) HasUri() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *OpenRequest) ClearUri() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Uri = nil
+}
+
+type OpenRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Uri *string
+}
+
+func (b0 OpenRequest_builder) Build() *OpenRequest {
+	m0 := &OpenRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Uri != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 1)
+		x.xxx_hidden_Uri = b.Uri
+	}
+	return m0
+}
+
 type OpenResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -95,16 +128,25 @@ func (x *OpenResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use OpenResponse.ProtoReflect.Descriptor instead.
-func (*OpenResponse) Descriptor() ([]byte, []int) {
-	return file_dev_warashi_muscat_v1_muscat_proto_rawDescGZIP(), []int{1}
+type OpenResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+}
+
+func (b0 OpenResponse_builder) Build() *OpenResponse {
+	m0 := &OpenResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	return m0
 }
 
 type CopyRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Body          []byte                 `protobuf:"bytes,1,opt,name=body,proto3" json:"body,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Body        []byte                 `protobuf:"bytes,1,opt,name=body" json:"body,omitempty"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
 }
 
 func (x *CopyRequest) Reset() {
@@ -132,20 +174,52 @@ func (x *CopyRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use CopyRequest.ProtoReflect.Descriptor instead.
-func (*CopyRequest) Descriptor() ([]byte, []int) {
-	return file_dev_warashi_muscat_v1_muscat_proto_rawDescGZIP(), []int{2}
-}
-
 func (x *CopyRequest) GetBody() []byte {
 	if x != nil {
-		return x.Body
+		return x.xxx_hidden_Body
 	}
 	return nil
 }
 
+func (x *CopyRequest) SetBody(v []byte) {
+	if v == nil {
+		v = []byte{}
+	}
+	x.xxx_hidden_Body = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 1)
+}
+
+func (x *CopyRequest) HasBody() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *CopyRequest) ClearBody() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Body = nil
+}
+
+type CopyRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Body []byte
+}
+
+func (b0 CopyRequest_builder) Build() *CopyRequest {
+	m0 := &CopyRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Body != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 1)
+		x.xxx_hidden_Body = b.Body
+	}
+	return m0
+}
+
 type CopyResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -175,13 +249,20 @@ func (x *CopyResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use CopyResponse.ProtoReflect.Descriptor instead.
-func (*CopyResponse) Descriptor() ([]byte, []int) {
-	return file_dev_warashi_muscat_v1_muscat_proto_rawDescGZIP(), []int{3}
+type CopyResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+}
+
+func (b0 CopyResponse_builder) Build() *CopyResponse {
+	m0 := &CopyResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	return m0
 }
 
 type PasteRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -211,16 +292,25 @@ func (x *PasteRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use PasteRequest.ProtoReflect.Descriptor instead.
-func (*PasteRequest) Descriptor() ([]byte, []int) {
-	return file_dev_warashi_muscat_v1_muscat_proto_rawDescGZIP(), []int{4}
+type PasteRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+}
+
+func (b0 PasteRequest_builder) Build() *PasteRequest {
+	m0 := &PasteRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	return m0
 }
 
 type PasteResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Body          []byte                 `protobuf:"bytes,1,opt,name=body,proto3" json:"body,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Body        []byte                 `protobuf:"bytes,1,opt,name=body" json:"body,omitempty"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
 }
 
 func (x *PasteResponse) Reset() {
@@ -248,20 +338,52 @@ func (x *PasteResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use PasteResponse.ProtoReflect.Descriptor instead.
-func (*PasteResponse) Descriptor() ([]byte, []int) {
-	return file_dev_warashi_muscat_v1_muscat_proto_rawDescGZIP(), []int{5}
-}
-
 func (x *PasteResponse) GetBody() []byte {
 	if x != nil {
-		return x.Body
+		return x.xxx_hidden_Body
 	}
 	return nil
 }
 
+func (x *PasteResponse) SetBody(v []byte) {
+	if v == nil {
+		v = []byte{}
+	}
+	x.xxx_hidden_Body = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 1)
+}
+
+func (x *PasteResponse) HasBody() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *PasteResponse) ClearBody() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Body = nil
+}
+
+type PasteResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Body []byte
+}
+
+func (b0 PasteResponse_builder) Build() *PasteResponse {
+	m0 := &PasteResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Body != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 1)
+		x.xxx_hidden_Body = b.Body
+	}
+	return m0
+}
+
 type HealthRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -291,16 +413,25 @@ func (x *HealthRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use HealthRequest.ProtoReflect.Descriptor instead.
-func (*HealthRequest) Descriptor() ([]byte, []int) {
-	return file_dev_warashi_muscat_v1_muscat_proto_rawDescGZIP(), []int{6}
+type HealthRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+}
+
+func (b0 HealthRequest_builder) Build() *HealthRequest {
+	m0 := &HealthRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	return m0
 }
 
 type HealthResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Pid           int64                  `protobuf:"varint,1,opt,name=pid,proto3" json:"pid,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Pid         int64                  `protobuf:"varint,1,opt,name=pid" json:"pid,omitempty"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
 }
 
 func (x *HealthResponse) Reset() {
@@ -328,20 +459,49 @@ func (x *HealthResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use HealthResponse.ProtoReflect.Descriptor instead.
-func (*HealthResponse) Descriptor() ([]byte, []int) {
-	return file_dev_warashi_muscat_v1_muscat_proto_rawDescGZIP(), []int{7}
-}
-
 func (x *HealthResponse) GetPid() int64 {
 	if x != nil {
-		return x.Pid
+		return x.xxx_hidden_Pid
 	}
 	return 0
 }
 
+func (x *HealthResponse) SetPid(v int64) {
+	x.xxx_hidden_Pid = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 1)
+}
+
+func (x *HealthResponse) HasPid() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *HealthResponse) ClearPid() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Pid = 0
+}
+
+type HealthResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Pid *int64
+}
+
+func (b0 HealthResponse_builder) Build() *HealthResponse {
+	m0 := &HealthResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Pid != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 1)
+		x.xxx_hidden_Pid = *b.Pid
+	}
+	return m0
+}
+
 type GetInputMethodRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -371,16 +531,25 @@ func (x *GetInputMethodRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetInputMethodRequest.ProtoReflect.Descriptor instead.
-func (*GetInputMethodRequest) Descriptor() ([]byte, []int) {
-	return file_dev_warashi_muscat_v1_muscat_proto_rawDescGZIP(), []int{8}
+type GetInputMethodRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+}
+
+func (b0 GetInputMethodRequest_builder) Build() *GetInputMethodRequest {
+	m0 := &GetInputMethodRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	return m0
 }
 
 type GetInputMethodResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Id          *string                `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
 }
 
 func (x *GetInputMethodResponse) Reset() {
@@ -408,23 +577,57 @@ func (x *GetInputMethodResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetInputMethodResponse.ProtoReflect.Descriptor instead.
-func (*GetInputMethodResponse) Descriptor() ([]byte, []int) {
-	return file_dev_warashi_muscat_v1_muscat_proto_rawDescGZIP(), []int{9}
-}
-
 func (x *GetInputMethodResponse) GetId() string {
 	if x != nil {
-		return x.Id
+		if x.xxx_hidden_Id != nil {
+			return *x.xxx_hidden_Id
+		}
+		return ""
 	}
 	return ""
 }
 
+func (x *GetInputMethodResponse) SetId(v string) {
+	x.xxx_hidden_Id = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 1)
+}
+
+func (x *GetInputMethodResponse) HasId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *GetInputMethodResponse) ClearId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Id = nil
+}
+
+type GetInputMethodResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Id *string
+}
+
+func (b0 GetInputMethodResponse_builder) Build() *GetInputMethodResponse {
+	m0 := &GetInputMethodResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Id != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 1)
+		x.xxx_hidden_Id = b.Id
+	}
+	return m0
+}
+
 type SetInputMethodRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Id          *string                `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
 }
 
 func (x *SetInputMethodRequest) Reset() {
@@ -452,23 +655,57 @@ func (x *SetInputMethodRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use SetInputMethodRequest.ProtoReflect.Descriptor instead.
-func (*SetInputMethodRequest) Descriptor() ([]byte, []int) {
-	return file_dev_warashi_muscat_v1_muscat_proto_rawDescGZIP(), []int{10}
-}
-
 func (x *SetInputMethodRequest) GetId() string {
 	if x != nil {
-		return x.Id
+		if x.xxx_hidden_Id != nil {
+			return *x.xxx_hidden_Id
+		}
+		return ""
 	}
 	return ""
 }
 
+func (x *SetInputMethodRequest) SetId(v string) {
+	x.xxx_hidden_Id = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 1)
+}
+
+func (x *SetInputMethodRequest) HasId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *SetInputMethodRequest) ClearId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Id = nil
+}
+
+type SetInputMethodRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Id *string
+}
+
+func (b0 SetInputMethodRequest_builder) Build() *SetInputMethodRequest {
+	m0 := &SetInputMethodRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Id != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 1)
+		x.xxx_hidden_Id = b.Id
+	}
+	return m0
+}
+
 type SetInputMethodResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Before        string                 `protobuf:"bytes,1,opt,name=before,proto3" json:"before,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Before      *string                `protobuf:"bytes,1,opt,name=before" json:"before,omitempty"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
 }
 
 func (x *SetInputMethodResponse) Reset() {
@@ -496,24 +733,58 @@ func (x *SetInputMethodResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use SetInputMethodResponse.ProtoReflect.Descriptor instead.
-func (*SetInputMethodResponse) Descriptor() ([]byte, []int) {
-	return file_dev_warashi_muscat_v1_muscat_proto_rawDescGZIP(), []int{11}
-}
-
 func (x *SetInputMethodResponse) GetBefore() string {
 	if x != nil {
-		return x.Before
+		if x.xxx_hidden_Before != nil {
+			return *x.xxx_hidden_Before
+		}
+		return ""
 	}
 	return ""
 }
 
+func (x *SetInputMethodResponse) SetBefore(v string) {
+	x.xxx_hidden_Before = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 1)
+}
+
+func (x *SetInputMethodResponse) HasBefore() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *SetInputMethodResponse) ClearBefore() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Before = nil
+}
+
+type SetInputMethodResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Before *string
+}
+
+func (b0 SetInputMethodResponse_builder) Build() *SetInputMethodResponse {
+	m0 := &SetInputMethodResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Before != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 1)
+		x.xxx_hidden_Before = b.Before
+	}
+	return m0
+}
+
 // PortForwardRequest.body is a body of transfered data.
 type PortForwardRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Body          []byte                 `protobuf:"bytes,1,opt,name=body,proto3" json:"body,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Body        []byte                 `protobuf:"bytes,1,opt,name=body" json:"body,omitempty"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
 }
 
 func (x *PortForwardRequest) Reset() {
@@ -541,24 +812,58 @@ func (x *PortForwardRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use PortForwardRequest.ProtoReflect.Descriptor instead.
-func (*PortForwardRequest) Descriptor() ([]byte, []int) {
-	return file_dev_warashi_muscat_v1_muscat_proto_rawDescGZIP(), []int{12}
-}
-
 func (x *PortForwardRequest) GetBody() []byte {
 	if x != nil {
-		return x.Body
+		return x.xxx_hidden_Body
 	}
 	return nil
 }
 
+func (x *PortForwardRequest) SetBody(v []byte) {
+	if v == nil {
+		v = []byte{}
+	}
+	x.xxx_hidden_Body = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 1)
+}
+
+func (x *PortForwardRequest) HasBody() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *PortForwardRequest) ClearBody() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Body = nil
+}
+
+type PortForwardRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Body []byte
+}
+
+func (b0 PortForwardRequest_builder) Build() *PortForwardRequest {
+	m0 := &PortForwardRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Body != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 1)
+		x.xxx_hidden_Body = b.Body
+	}
+	return m0
+}
+
 // PortForwardResponse.body is a body of transfered data.
 type PortForwardResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Body          []byte                 `protobuf:"bytes,1,opt,name=body,proto3" json:"body,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Body        []byte                 `protobuf:"bytes,1,opt,name=body" json:"body,omitempty"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
 }
 
 func (x *PortForwardResponse) Reset() {
@@ -586,16 +891,48 @@ func (x *PortForwardResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use PortForwardResponse.ProtoReflect.Descriptor instead.
-func (*PortForwardResponse) Descriptor() ([]byte, []int) {
-	return file_dev_warashi_muscat_v1_muscat_proto_rawDescGZIP(), []int{13}
-}
-
 func (x *PortForwardResponse) GetBody() []byte {
 	if x != nil {
-		return x.Body
+		return x.xxx_hidden_Body
 	}
 	return nil
+}
+
+func (x *PortForwardResponse) SetBody(v []byte) {
+	if v == nil {
+		v = []byte{}
+	}
+	x.xxx_hidden_Body = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 1)
+}
+
+func (x *PortForwardResponse) HasBody() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *PortForwardResponse) ClearBody() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Body = nil
+}
+
+type PortForwardResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Body []byte
+}
+
+func (b0 PortForwardResponse_builder) Build() *PortForwardResponse {
+	m0 := &PortForwardResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Body != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 1)
+		x.xxx_hidden_Body = b.Body
+	}
+	return m0
 }
 
 var File_dev_warashi_muscat_v1_muscat_proto protoreflect.FileDescriptor
@@ -677,20 +1014,8 @@ var file_dev_warashi_muscat_v1_muscat_proto_rawDesc = []byte{
 	0x50, 0x6f, 0x72, 0x74, 0x46, 0x6f, 0x72, 0x77, 0x61, 0x72, 0x64, 0x52, 0x65, 0x73, 0x70, 0x6f,
 	0x6e, 0x73, 0x65, 0x28, 0x01, 0x30, 0x01, 0x42, 0x21, 0x5a, 0x1f, 0x67, 0x69, 0x74, 0x68, 0x75,
 	0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x57, 0x61, 0x72, 0x61, 0x73, 0x68, 0x69, 0x2f, 0x6d, 0x75,
-	0x73, 0x63, 0x61, 0x74, 0x2f, 0x76, 0x32, 0x2f, 0x70, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74,
-	0x6f, 0x33,
-}
-
-var (
-	file_dev_warashi_muscat_v1_muscat_proto_rawDescOnce sync.Once
-	file_dev_warashi_muscat_v1_muscat_proto_rawDescData = file_dev_warashi_muscat_v1_muscat_proto_rawDesc
-)
-
-func file_dev_warashi_muscat_v1_muscat_proto_rawDescGZIP() []byte {
-	file_dev_warashi_muscat_v1_muscat_proto_rawDescOnce.Do(func() {
-		file_dev_warashi_muscat_v1_muscat_proto_rawDescData = protoimpl.X.CompressGZIP(file_dev_warashi_muscat_v1_muscat_proto_rawDescData)
-	})
-	return file_dev_warashi_muscat_v1_muscat_proto_rawDescData
+	0x73, 0x63, 0x61, 0x74, 0x2f, 0x76, 0x32, 0x2f, 0x70, 0x62, 0x62, 0x08, 0x65, 0x64, 0x69, 0x74,
+	0x69, 0x6f, 0x6e, 0x73, 0x70, 0xe8, 0x07,
 }
 
 var file_dev_warashi_muscat_v1_muscat_proto_msgTypes = make([]protoimpl.MessageInfo, 14)

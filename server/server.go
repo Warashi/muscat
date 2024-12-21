@@ -14,6 +14,7 @@ import (
 	"connectrpc.com/connect"
 	"github.com/Warashi/go-swim"
 	"github.com/skratchdot/open-golang/open"
+	"google.golang.org/protobuf/proto"
 
 	"github.com/Warashi/muscat/v2/consts"
 	"github.com/Warashi/muscat/v2/pb"
@@ -33,7 +34,7 @@ type MuscatServer struct {
 
 // Health implements pbconnect.MuscatServiceHandler.
 func (m *MuscatServer) Health(context.Context, *connect.Request[pb.HealthRequest]) (*connect.Response[pb.HealthResponse], error) {
-	return connect.NewResponse(&pb.HealthResponse{Pid: int64(os.Getpid())}), nil
+	return connect.NewResponse(pb.HealthResponse_builder{Pid: proto.Int64(int64(os.Getpid()))}.Build()), nil
 }
 
 // Open implements pbconnect.MuscatServiceHandler.
@@ -66,7 +67,7 @@ func (m *MuscatServer) Copy(ctx context.Context, s *connect.ClientStream[pb.Copy
 
 // Paste implements pbconnect.MuscatServiceHandler.
 func (m *MuscatServer) Paste(ctx context.Context, req *connect.Request[pb.PasteRequest], s *connect.ServerStream[pb.PasteResponse]) error {
-	dst := stream.NewWriter(func(body []byte) *pb.PasteResponse { return &pb.PasteResponse{Body: body} }, s)
+	dst := stream.NewWriter(func(body []byte) *pb.PasteResponse { return pb.PasteResponse_builder{Body: body}.Build() }, s)
 	var body []byte
 	if clipboard.Unsupported() {
 		m.mu.Lock()
@@ -91,7 +92,7 @@ func (*MuscatServer) GetInputMethod(ctx context.Context, req *connect.Request[pb
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("swim.Get: %w", err))
 	}
-	return connect.NewResponse(&pb.GetInputMethodResponse{Id: id}), nil
+	return connect.NewResponse(pb.GetInputMethodResponse_builder{Id: proto.String(id)}.Build()), nil
 }
 
 // SetInputMethod implements pbconnect.MuscatServiceHandler.
@@ -103,7 +104,7 @@ func (*MuscatServer) SetInputMethod(ctx context.Context, req *connect.Request[pb
 	if err := swim.Set(req.Msg.GetId()); err != nil {
 		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("swim.Set: %w", err))
 	}
-	return connect.NewResponse(&pb.SetInputMethodResponse{Before: before}), nil
+	return connect.NewResponse(pb.SetInputMethodResponse_builder{Before: proto.String(before)}.Build()), nil
 }
 
 // PortForward implements pbconnect.MuscatServiceHandler.
@@ -123,7 +124,7 @@ func (*MuscatServer) PortForward(ctx context.Context, s *connect.BidiStream[pb.P
 
 	go func() {
 		defer wg.Done()
-		dst := stream.NewWriter(func(body []byte) *pb.PortForwardResponse { return &pb.PortForwardResponse{Body: body} }, s)
+		dst := stream.NewWriter(func(body []byte) *pb.PortForwardResponse { return pb.PortForwardResponse_builder{Body: body}.Build() }, s)
 		if _, err := io.Copy(dst, conn); err != nil {
 			log.Printf("io.Copy: %v\n", err)
 		}
