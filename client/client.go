@@ -101,7 +101,7 @@ func (m *MuscatClient) Copy(ctx context.Context, r io.Reader) (err error) {
 	s := m.pb.Copy(ctx)
 	defer func() {
 		if _, closeErr := s.CloseAndReceive(); closeErr != nil && !errors.Is(closeErr, io.EOF) {
-			err = errors.Join(err, fmt.Errorf("stream.CloseAndRecv: %w", err))
+			err = errors.Join(err, fmt.Errorf("stream.CloseAndRecv: %w", closeErr))
 		}
 	}()
 	dst, src := bufio.NewWriter(stream.NewWriter(func(body []byte) *pb.CopyRequest { return pb.CopyRequest_builder{Body: body}.Build() }, s)), bufio.NewReader(r)
