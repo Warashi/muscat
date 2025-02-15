@@ -49,10 +49,17 @@ var serverCmd = &cobra.Command{
 		l, err := net.Listen(network, addr)
 		if err != nil {
 			if network == "unix" {
-				cmd.PrintErrf("remove %s and try again\n", addr)
+				// Remove addr file if already exists and retry
+				if err := os.Remove(addr); err != nil {
+					cmd.PrintErrf("os.Remove: %v", err)
+					return
+				}
+				l, err = net.Listen(network, addr)
+				if err != nil {
+					cmd.PrintErrf("net.Listen: %v", err)
+					return
+				}
 			}
-			cmd.PrintErrf("net.Listen: %v", err)
-			return
 		}
 
 		mux := http.NewServeMux()
