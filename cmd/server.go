@@ -26,11 +26,13 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/spf13/cobra"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
 
+	"github.com/Warashi/muscat/v2/client"
 	"github.com/Warashi/muscat/v2/pb/pbconnect"
 	"github.com/Warashi/muscat/v2/server"
 )
@@ -65,6 +67,8 @@ var serverCmd = &cobra.Command{
 		mux := http.NewServeMux()
 		mux.Handle(pbconnect.NewMuscatServiceHandler(new(server.MuscatServer)))
 
+		go checkSocketProcess(network, addr)
+
 		if err := http.Serve(l, h2c.NewHandler(mux, new(http2.Server))); err != nil {
 			cmd.PrintErrf("s.Serve: %v", err)
 			return
@@ -74,4 +78,31 @@ var serverCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(serverCmd)
+}
+
+func getSocketProcessID(network, addr string) (int, error) {
+	muscat := client.New(network, addr)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	pid, err := muscat.Health(ctx)
+	if err != nil {
+		return 0, err
+	}
+	return pid, nil
+}
+
+func checkSocketProcess(network, addr string) {
+	ticker := time.NewTicker(10 * time.Second)
+	defer ticker.Stop()
+
+	for range ticker.C {
+		pid, err := getSocketProcessID(network, addr)
+		if err != nil {
+			continue
+		}
+		if pid != os.Getpid() {
+			os.Exit(0)
+		}
+	}
 }
