@@ -10,7 +10,7 @@
 }:
 buildGoModule {
   pname = "muscat";
-  version = "2.3.0";
+  version = "2.3.1";
   vendorHash = "sha256-vU4Xsagmd958t7mc+YZN34iM2AOl2bxGQcv4ReUHLog=";
 
   src = ./.;
