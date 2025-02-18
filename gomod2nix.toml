@@ -1,0 +1,51 @@
+schema = 3
+
+[mod]
+  [mod."connectrpc.com/connect"]
+    version = "v1.17.0"
+    hash = "sha256-CrqstpeTRnMMxCzomGIb4buU4puHcfeYmJ7F/fpdC7w="
+  [mod."github.com/Warashi/go-swim"]
+    version = "v0.0.0-20220912062543-3596431113e5"
+    hash = "sha256-HfQDF1HPiXsovoKVzOm/LMeU+zMU09wpSpbc8vp6qWk="
+  [mod."github.com/atotto/clipboard"]
+    version = "v0.1.4"
+    hash = "sha256-ZZ7U5X0gWOu8zcjZcWbcpzGOGdycwq0TjTFh/eZHjXk="
+  [mod."github.com/google/go-cmp"]
+    version = "v0.6.0"
+    hash = "sha256-qgra5jze4iPGP0JSTVeY5qV5AvEnEu39LYAuUCIkMtg="
+  [mod."github.com/inconshreveable/mousetrap"]
+    version = "v1.1.0"
+    hash = "sha256-XWlYH0c8IcxAwQTnIi6WYqq44nOKUylSWxWO/vi+8pE="
+  [mod."github.com/skratchdot/open-golang"]
+    version = "v0.0.0-20200116055534-eef842397966"
+    hash = "sha256-XUA03mdcSkQvAVQz9NBbikZWe75tukH2tNJQGaUCyso="
+  [mod."github.com/spf13/cobra"]
+    version = "v1.8.1"
+    hash = "sha256-yDF6yAHycV1IZOrt3/hofR+QINe+B2yqkcIaVov3Ky8="
+  [mod."github.com/spf13/pflag"]
+    version = "v1.0.5"
+    hash = "sha256-w9LLYzxxP74WHT4ouBspH/iQZXjuAh2WQCHsuvyEjAw="
+  [mod."golang.design/x/clipboard"]
+    version = "v0.7.0"
+    hash = "sha256-8nLafFDR8ZT+cVS1OP0Ga5sfxBEU0jqJfEsaopqAJQg="
+  [mod."golang.org/x/exp/shiny"]
+    version = "v0.0.0-20241217172543-b2144cdd0a67"
+    hash = "sha256-OzKqtLbKQifhfDn3TnTCscfBIdKCHcvGNQuVYcqSMmc="
+  [mod."golang.org/x/image"]
+    version = "v0.23.0"
+    hash = "sha256-6bqCdzSZE8oQWRIJszgVvy4MTmh5MDNRRdpIAD9mo3Y="
+  [mod."golang.org/x/mobile"]
+    version = "v0.0.0-20241213221354-a87c1cf6cf46"
+    hash = "sha256-5ta+uoFmRkZT9QwEdOlm577zWLfAzWp4J3Ma16wtCiM="
+  [mod."golang.org/x/net"]
+    version = "v0.33.0"
+    hash = "sha256-9swkU9vp6IflUUqAzK+y8PytSmrKLuryidP3RmRfe0w="
+  [mod."golang.org/x/sys"]
+    version = "v0.28.0"
+    hash = "sha256-kzSlDo5FKsQU9cLefIt2dueGUfz9XuEW+mGSGlPATGc="
+  [mod."golang.org/x/text"]
+    version = "v0.21.0"
+    hash = "sha256-QaMwddBRnoS2mv9Y86eVC2x2wx/GZ7kr2zAJvwDeCPc="
+  [mod."google.golang.org/protobuf"]
+    version = "v1.36.0"
+    hash = "sha256-7LfDxB2/x6sSzJdQ3sixWMaY0WZ/juwuz3rPBJxNzXQ="
