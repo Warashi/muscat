@@ -1,19 +1,30 @@
-{
-  stdenv,
-  lib,
-  darwin,
-  xorg,
-  makeWrapper,
-  buildGoModule,
+{ pkgs ? (
+    let
+      inherit (builtins) fetchTree fromJSON readFile;
+      inherit ((fromJSON (readFile ./flake.lock)).nodes) nixpkgs gomod2nix;
+    in
+    import (fetchTree nixpkgs.locked) {
+      overlays = [
+        (import "${fetchTree gomod2nix.locked}/overlay.nix")
+      ];
+    }
+  ),
+  stdenv ? pkgs.stdenv,
+  lib ? pkgs.lib,
+  darwin ? pkgs.darwin,
+  xorg ? pkgs.xorg,
+  makeWrapper ? pkgs.makeWrapper,
+  buildGoApplication ? pkgs.buildGoApplication,
   useGolangDesign ? false,
   ...
 }:
-buildGoModule {
+
+buildGoApplication {
   pname = "muscat";
   version = "2.3.1";
-  vendorHash = "sha256-vU4Xsagmd958t7mc+YZN34iM2AOl2bxGQcv4ReUHLog=";
-
+  pwd = ./.;
   src = ./.;
+  modules = ./gomod2nix.toml;
 
   tags =
     if useGolangDesign
