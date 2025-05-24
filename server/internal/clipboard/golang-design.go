@@ -10,9 +10,7 @@ func init() {
 	}
 }
 
-var (
-	unsupported bool
-)
+var unsupported bool
 
 func Unsupported() bool {
 	return unsupported

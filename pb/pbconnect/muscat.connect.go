@@ -52,18 +52,6 @@ const (
 	MuscatServicePortForwardProcedure = "/dev.warashi.muscat.v1.MuscatService/PortForward"
 )
 
-// These variables are the protoreflect.Descriptor objects for the RPCs defined in this package.
-var (
-	muscatServiceServiceDescriptor              = pb.File_dev_warashi_muscat_v1_muscat_proto.Services().ByName("MuscatService")
-	muscatServiceHealthMethodDescriptor         = muscatServiceServiceDescriptor.Methods().ByName("Health")
-	muscatServiceOpenMethodDescriptor           = muscatServiceServiceDescriptor.Methods().ByName("Open")
-	muscatServiceCopyMethodDescriptor           = muscatServiceServiceDescriptor.Methods().ByName("Copy")
-	muscatServicePasteMethodDescriptor          = muscatServiceServiceDescriptor.Methods().ByName("Paste")
-	muscatServiceGetInputMethodMethodDescriptor = muscatServiceServiceDescriptor.Methods().ByName("GetInputMethod")
-	muscatServiceSetInputMethodMethodDescriptor = muscatServiceServiceDescriptor.Methods().ByName("SetInputMethod")
-	muscatServicePortForwardMethodDescriptor    = muscatServiceServiceDescriptor.Methods().ByName("PortForward")
-)
-
 // MuscatServiceClient is a client for the dev.warashi.muscat.v1.MuscatService service.
 type MuscatServiceClient interface {
 	Health(context.Context, *connect.Request[pb.HealthRequest]) (*connect.Response[pb.HealthResponse], error)
@@ -87,47 +75,48 @@ type MuscatServiceClient interface {
 // http://api.acme.com or https://acme.com/grpc).
 func NewMuscatServiceClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) MuscatServiceClient {
 	baseURL = strings.TrimRight(baseURL, "/")
+	muscatServiceMethods := pb.File_dev_warashi_muscat_v1_muscat_proto.Services().ByName("MuscatService").Methods()
 	return &muscatServiceClient{
 		health: connect.NewClient[pb.HealthRequest, pb.HealthResponse](
 			httpClient,
 			baseURL+MuscatServiceHealthProcedure,
-			connect.WithSchema(muscatServiceHealthMethodDescriptor),
+			connect.WithSchema(muscatServiceMethods.ByName("Health")),
 			connect.WithClientOptions(opts...),
 		),
 		open: connect.NewClient[pb.OpenRequest, pb.OpenResponse](
 			httpClient,
 			baseURL+MuscatServiceOpenProcedure,
-			connect.WithSchema(muscatServiceOpenMethodDescriptor),
+			connect.WithSchema(muscatServiceMethods.ByName("Open")),
 			connect.WithClientOptions(opts...),
 		),
 		copy: connect.NewClient[pb.CopyRequest, pb.CopyResponse](
 			httpClient,
 			baseURL+MuscatServiceCopyProcedure,
-			connect.WithSchema(muscatServiceCopyMethodDescriptor),
+			connect.WithSchema(muscatServiceMethods.ByName("Copy")),
 			connect.WithClientOptions(opts...),
 		),
 		paste: connect.NewClient[pb.PasteRequest, pb.PasteResponse](
 			httpClient,
 			baseURL+MuscatServicePasteProcedure,
-			connect.WithSchema(muscatServicePasteMethodDescriptor),
+			connect.WithSchema(muscatServiceMethods.ByName("Paste")),
 			connect.WithClientOptions(opts...),
 		),
 		getInputMethod: connect.NewClient[pb.GetInputMethodRequest, pb.GetInputMethodResponse](
 			httpClient,
 			baseURL+MuscatServiceGetInputMethodProcedure,
-			connect.WithSchema(muscatServiceGetInputMethodMethodDescriptor),
+			connect.WithSchema(muscatServiceMethods.ByName("GetInputMethod")),
 			connect.WithClientOptions(opts...),
 		),
 		setInputMethod: connect.NewClient[pb.SetInputMethodRequest, pb.SetInputMethodResponse](
 			httpClient,
 			baseURL+MuscatServiceSetInputMethodProcedure,
-			connect.WithSchema(muscatServiceSetInputMethodMethodDescriptor),
+			connect.WithSchema(muscatServiceMethods.ByName("SetInputMethod")),
 			connect.WithClientOptions(opts...),
 		),
 		portForward: connect.NewClient[pb.PortForwardRequest, pb.PortForwardResponse](
 			httpClient,
 			baseURL+MuscatServicePortForwardProcedure,
-			connect.WithSchema(muscatServicePortForwardMethodDescriptor),
+			connect.WithSchema(muscatServiceMethods.ByName("PortForward")),
 			connect.WithClientOptions(opts...),
 		),
 	}
@@ -199,46 +188,47 @@ type MuscatServiceHandler interface {
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
 func NewMuscatServiceHandler(svc MuscatServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	muscatServiceMethods := pb.File_dev_warashi_muscat_v1_muscat_proto.Services().ByName("MuscatService").Methods()
 	muscatServiceHealthHandler := connect.NewUnaryHandler(
 		MuscatServiceHealthProcedure,
 		svc.Health,
-		connect.WithSchema(muscatServiceHealthMethodDescriptor),
+		connect.WithSchema(muscatServiceMethods.ByName("Health")),
 		connect.WithHandlerOptions(opts...),
 	)
 	muscatServiceOpenHandler := connect.NewUnaryHandler(
 		MuscatServiceOpenProcedure,
 		svc.Open,
-		connect.WithSchema(muscatServiceOpenMethodDescriptor),
+		connect.WithSchema(muscatServiceMethods.ByName("Open")),
 		connect.WithHandlerOptions(opts...),
 	)
 	muscatServiceCopyHandler := connect.NewClientStreamHandler(
 		MuscatServiceCopyProcedure,
 		svc.Copy,
-		connect.WithSchema(muscatServiceCopyMethodDescriptor),
+		connect.WithSchema(muscatServiceMethods.ByName("Copy")),
 		connect.WithHandlerOptions(opts...),
 	)
 	muscatServicePasteHandler := connect.NewServerStreamHandler(
 		MuscatServicePasteProcedure,
 		svc.Paste,
-		connect.WithSchema(muscatServicePasteMethodDescriptor),
+		connect.WithSchema(muscatServiceMethods.ByName("Paste")),
 		connect.WithHandlerOptions(opts...),
 	)
 	muscatServiceGetInputMethodHandler := connect.NewUnaryHandler(
 		MuscatServiceGetInputMethodProcedure,
 		svc.GetInputMethod,
-		connect.WithSchema(muscatServiceGetInputMethodMethodDescriptor),
+		connect.WithSchema(muscatServiceMethods.ByName("GetInputMethod")),
 		connect.WithHandlerOptions(opts...),
 	)
 	muscatServiceSetInputMethodHandler := connect.NewUnaryHandler(
 		MuscatServiceSetInputMethodProcedure,
 		svc.SetInputMethod,
-		connect.WithSchema(muscatServiceSetInputMethodMethodDescriptor),
+		connect.WithSchema(muscatServiceMethods.ByName("SetInputMethod")),
 		connect.WithHandlerOptions(opts...),
 	)
 	muscatServicePortForwardHandler := connect.NewBidiStreamHandler(
 		MuscatServicePortForwardProcedure,
 		svc.PortForward,
-		connect.WithSchema(muscatServicePortForwardMethodDescriptor),
+		connect.WithSchema(muscatServiceMethods.ByName("PortForward")),
 		connect.WithHandlerOptions(opts...),
 	)
 	return "/dev.warashi.muscat.v1.MuscatService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

@@ -40,12 +40,12 @@ message SetInputMethodResponse {
   string before = 1;
 }
 
-// PortForwardRequest.body is a body of transfered data.
+// PortForwardRequest.body is a body of transferred data.
 message PortForwardRequest {
   bytes body = 1;
 }
 
-// PortForwardResponse.body is a body of transfered data.
+// PortForwardResponse.body is a body of transferred data.
 message PortForwardResponse {
   bytes body = 1;
 }
