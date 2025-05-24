@@ -1,5 +1,5 @@
 {
-  description = "A flake for OCaml development with pre-commit hooks and treefmt integration";
+  description = "A flake for muscat development / build";
 
   inputs = {
     nixpkgs = {
