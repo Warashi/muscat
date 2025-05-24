@@ -1,35 +1,84 @@
 {
-  description = "A flake for muscat development / build";
+  description = "A flake for OCaml development with pre-commit hooks and treefmt integration";
 
-  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-  inputs.flake-utils.url = "github:numtide/flake-utils";
-  inputs.gomod2nix.url = "github:nix-community/gomod2nix";
-  inputs.gomod2nix.inputs.nixpkgs.follows = "nixpkgs";
-  inputs.gomod2nix.inputs.flake-utils.follows = "flake-utils";
+  inputs = {
+    nixpkgs = {
+      url = "github:nixos/nixpkgs/nixpkgs-unstable";
+    };
+    flake-parts = {
+      url = "github:hercules-ci/flake-parts";
+    };
+    treefmt-nix = {
+      url = "github:numtide/treefmt-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    git-hooks = {
+      url = "github:cachix/git-hooks.nix";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+      };
+    };
+  };
 
   outputs =
-    {
-      self,
-      nixpkgs,
-      flake-utils,
-      gomod2nix,
-    }:
-    flake-utils.lib.eachDefaultSystem (
-      system:
-      let
-        pkgs = nixpkgs.legacyPackages.${system};
+    { flake-parts, ... }@inputs:
+    flake-parts.lib.mkFlake { inherit inputs; } {
+      systems = [
+        "x86_64-linux"
+        "aarch64-linux"
+        "x86_64-darwin"
+        "aarch64-darwin"
+      ];
 
-        # The current default sdk for macOS fails to compile go projects, so we use a newer one for now.
-        # This has no effect on other platforms.
-        callPackage = pkgs.darwin.apple_sdk_11_0.callPackage or pkgs.callPackage;
-      in
-      {
-        packages.default = callPackage ./. {
-          inherit (gomod2nix.legacyPackages.${system}) buildGoApplication;
+      imports = [
+        inputs.git-hooks.flakeModule
+        inputs.treefmt-nix.flakeModule
+      ];
+
+      perSystem =
+        { config, pkgs, ... }:
+        {
+          pre-commit = {
+            check.enable = true;
+            settings = {
+              src = ./.;
+              hooks = {
+                actionlint.enable = true;
+                treefmt.enable = true;
+              };
+            };
+          };
+
+          treefmt = {
+            projectRootFile = "flake.nix";
+            programs = {
+              nixfmt = {
+                enable = true;
+                strict = true;
+              };
+              # keep-sorted start
+              gofmt.enable = true;
+              gofumpt.enable = true;
+              goimports.enable = true;
+              golines.enable = true;
+              keep-sorted.enable = true;
+              pinact.enable = true;
+              typos.enable = true;
+              # keep-sorted end
+            };
+          };
+
+          packages.default = pkgs.callPackage ./. { };
+
+          devShells.default = pkgs.mkShell {
+            packages = with pkgs; [
+              # keep-sorted start
+              go
+              gotools
+              # keep-sorted end
+            ];
+            shellHook = config.pre-commit.installationScript;
+          };
         };
-        devShells.default = callPackage ./shell.nix {
-          inherit (gomod2nix.legacyPackages.${system}) mkGoEnv gomod2nix;
-        };
-      }
-    );
+    };
 }
