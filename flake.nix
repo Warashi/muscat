@@ -66,6 +66,40 @@
               typos.enable = true;
               # keep-sorted end
             };
+            settings = {
+              formatter = {
+                nixfmt = {
+                  excludes = [
+                    "**/_sources/generated.nix" # nvfetcher generated sources
+                  ];
+                };
+                gofmt = {
+                  excludes = [
+                    "pb/**" # generated protobuf files
+                  ];
+                };
+                gofumpt = {
+                  excludes = [
+                    "pb/**" # generated protobuf files
+                  ];
+                };
+                goimports = {
+                  excludes = [
+                    "pb/**" # generated protobuf files
+                  ];
+                };
+                golines = {
+                  excludes = [
+                    "pb/**" # generated protobuf files
+                  ];
+                };
+                typos = {
+                  excludes = [
+                    "pb/**" # generated protobuf files
+                  ];
+                };
+              };
+            };
           };
 
           packages.default = pkgs.callPackage ./. { };
