@@ -40,7 +40,9 @@ func New(network, addr string) *MuscatClient {
 			return (new(net.Dialer)).DialContext(ctx, network, addr)
 		},
 	}
-	return &MuscatClient{pb: pbconnect.NewMuscatServiceClient(client, "http://localhost", connect.WithSendGzip())}
+	return &MuscatClient{
+		pb: pbconnect.NewMuscatServiceClient(client, "http://localhost", connect.WithSendGzip()),
+	}
 }
 
 type MuscatClient struct {
@@ -104,7 +106,14 @@ func (m *MuscatClient) Copy(ctx context.Context, r io.Reader) (err error) {
 			err = errors.Join(err, fmt.Errorf("stream.CloseAndRecv: %w", closeErr))
 		}
 	}()
-	dst, src := bufio.NewWriter(stream.NewWriter(func(body []byte) *pb.CopyRequest { return pb.CopyRequest_builder{Body: body}.Build() }, s)), bufio.NewReader(r)
+	dst, src := bufio.NewWriter(
+		stream.NewWriter(
+			func(body []byte) *pb.CopyRequest { return pb.CopyRequest_builder{Body: body}.Build() },
+			s,
+		),
+	), bufio.NewReader(
+		r,
+	)
 	if _, err := io.Copy(dst, src); err != nil {
 		return fmt.Errorf("io.Copy: %w", err)
 	}
@@ -131,7 +140,10 @@ func (m *MuscatClient) GetInputMethod(ctx context.Context) (string, error) {
 }
 
 func (m *MuscatClient) SetInputMethod(ctx context.Context, id string) (before string, err error) {
-	res, err := m.pb.SetInputMethod(ctx, connect.NewRequest(pb.SetInputMethodRequest_builder{Id: proto.String(id)}.Build()))
+	res, err := m.pb.SetInputMethod(
+		ctx,
+		connect.NewRequest(pb.SetInputMethodRequest_builder{Id: proto.String(id)}.Build()),
+	)
 	if err != nil {
 		return "", fmt.Errorf("m.pb.SetInputMethod: %w", err)
 	}
@@ -173,7 +185,10 @@ func (m *MuscatClient) portForward(ctx context.Context, port string, conn net.Co
 		defer wg.Done()
 		defer s.CloseRequest()
 
-		dst := stream.NewWriter(func(body []byte) *pb.PortForwardRequest { return pb.PortForwardRequest_builder{Body: body}.Build() }, s)
+		dst := stream.NewWriter(
+			func(body []byte) *pb.PortForwardRequest { return pb.PortForwardRequest_builder{Body: body}.Build() },
+			s,
+		)
 		if _, err := io.Copy(dst, conn); err != nil {
 			log.Printf("io.Copy: %v", err)
 		}

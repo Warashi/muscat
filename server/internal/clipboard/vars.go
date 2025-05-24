@@ -2,6 +2,4 @@ package clipboard
 
 import "errors"
 
-var (
-	ErrUnsupported = errors.New("unsupported")
-)
+var ErrUnsupported = errors.New("unsupported")
