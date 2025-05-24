@@ -8,7 +8,7 @@
   darwin ? pkgs.darwin,
 }:
 pkgs.buildGoLatestModule {
-  name = "muscat";
+  pname = "muscat";
   version = "2.3.1";
   src = ./.;
   vendorHash = "sha256-CpfgeQ+HC53uDWBis2muee5rRuKsR7KcV8aQtygAQEA=";
