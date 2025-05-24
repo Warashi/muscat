@@ -73,6 +73,7 @@
           devShells.default = pkgs.mkShell {
             packages = with pkgs; [
               # keep-sorted start
+              buf
               go
               gotools
               # keep-sorted end
