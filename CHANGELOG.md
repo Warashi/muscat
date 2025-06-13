@@ -1,5 +1,9 @@
 # Changelog
 
+## [v2.3.3](https://github.com/Warashi/muscat/compare/v2.3.2...v2.3.3) - 2025-06-13
+- build(deps): bump github/codeql-action from 3.28.18 to 3.28.19 by @dependabot in https://github.com/Warashi/muscat/pull/40
+- Fix: Reuse http.Client in health checks to prevent too many open files by @Warashi in https://github.com/Warashi/muscat/pull/42
+
 ## [v2.3.2](https://github.com/Warashi/muscat/compare/v2.3.1...v2.3.2) - 2025-05-24
 - build: use gomod2nix by @Warashi in https://github.com/Warashi/muscat/pull/28
 - build(deps): bump golang.org/x/net from 0.33.0 to 0.38.0 by @dependabot in https://github.com/Warashi/muscat/pull/30
