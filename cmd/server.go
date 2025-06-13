@@ -37,8 +37,6 @@ import (
 	"github.com/Warashi/muscat/v2/server"
 )
 
-var muscatClient *client.MuscatClient
-
 // serverCmd represents the server command
 var serverCmd = &cobra.Command{
 	Use:   "server",
@@ -46,7 +44,7 @@ var serverCmd = &cobra.Command{
 	Long:  `Start rpc server for communicate with client invoked at remote machine`,
 	Run: func(cmd *cobra.Command, args []string) {
 		network, addr := mustGetListenArgs(context.Background())
-		muscatClient = client.New(network, addr)
+		muscatClient := client.New(network, addr)
 		if network == "unix" {
 			defer os.Remove(addr)
 		}
@@ -70,7 +68,7 @@ var serverCmd = &cobra.Command{
 		mux := http.NewServeMux()
 		mux.Handle(pbconnect.NewMuscatServiceHandler(new(server.MuscatServer)))
 
-		go checkSocketProcess(network, addr)
+		go checkSocketProcess(muscatClient)
 
 		if err := http.Serve(l, h2c.NewHandler(mux, new(http2.Server))); err != nil {
 			cmd.PrintErrf("s.Serve: %v", err)
@@ -83,7 +81,7 @@ func init() {
 	rootCmd.AddCommand(serverCmd)
 }
 
-func getSocketProcessID(muscat *client.MuscatClient, network, addr string) (int, error) {
+func getSocketProcessID(muscat *client.MuscatClient) (int, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -94,12 +92,12 @@ func getSocketProcessID(muscat *client.MuscatClient, network, addr string) (int,
 	return pid, nil
 }
 
-func checkSocketProcess(network, addr string) {
+func checkSocketProcess(muscatClient *client.MuscatClient) {
 	ticker := time.NewTicker(10 * time.Second)
 	defer ticker.Stop()
 
 	for range ticker.C {
-		pid, err := getSocketProcessID(muscatClient, network, addr)
+		pid, err := getSocketProcessID(muscatClient)
 		if err != nil {
 			continue
 		}
