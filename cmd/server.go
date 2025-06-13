@@ -37,6 +37,8 @@ import (
 	"github.com/Warashi/muscat/v2/server"
 )
 
+var muscatClient *client.MuscatClient
+
 // serverCmd represents the server command
 var serverCmd = &cobra.Command{
 	Use:   "server",
@@ -44,6 +46,7 @@ var serverCmd = &cobra.Command{
 	Long:  `Start rpc server for communicate with client invoked at remote machine`,
 	Run: func(cmd *cobra.Command, args []string) {
 		network, addr := mustGetListenArgs(context.Background())
+		muscatClient = client.New(network, addr)
 		if network == "unix" {
 			defer os.Remove(addr)
 		}
@@ -80,8 +83,7 @@ func init() {
 	rootCmd.AddCommand(serverCmd)
 }
 
-func getSocketProcessID(network, addr string) (int, error) {
-	muscat := client.New(network, addr)
+func getSocketProcessID(muscat *client.MuscatClient, network, addr string) (int, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -97,7 +99,7 @@ func checkSocketProcess(network, addr string) {
 	defer ticker.Stop()
 
 	for range ticker.C {
-		pid, err := getSocketProcessID(network, addr)
+		pid, err := getSocketProcessID(muscatClient, network, addr)
 		if err != nil {
 			continue
 		}
