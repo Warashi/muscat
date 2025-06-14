@@ -1,5 +1,8 @@
 # Changelog
 
+## [v2.3.4](https://github.com/Warashi/muscat/compare/v2.3.3...v2.3.4) - 2025-06-14
+- build(deps): bump github/codeql-action from 3.28.19 to 3.29.0 by @dependabot in https://github.com/Warashi/muscat/pull/43
+
 ## [v2.3.3](https://github.com/Warashi/muscat/compare/v2.3.2...v2.3.3) - 2025-06-13
 - build(deps): bump github/codeql-action from 3.28.18 to 3.28.19 by @dependabot in https://github.com/Warashi/muscat/pull/40
 - Fix: Reuse http.Client in health checks to prevent too many open files by @Warashi in https://github.com/Warashi/muscat/pull/42
