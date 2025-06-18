@@ -5,7 +5,7 @@
   makeWrapper ? pkgs.makeWrapper,
   lib ? pkgs.lib,
   xorg ? pkgs.xorg,
-  darwin ? pkgs.darwin,
+  apple-sdk ? pkgs.apple-sdk
 }:
 pkgs.buildGoLatestModule {
   pname = "muscat";
@@ -17,7 +17,7 @@ pkgs.buildGoLatestModule {
 
   buildInputs =
     if stdenv.isDarwin then
-      [ darwin.apple_sdk.frameworks.Cocoa ]
+      [ apple-sdk ]
     else if useGolangDesign then
       [ xorg.libX11 ]
     else
