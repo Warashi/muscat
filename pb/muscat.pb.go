@@ -936,6 +936,272 @@ func (b0 PortForwardResponse_builder) Build() *PortForwardResponse {
 	return m0
 }
 
+type ExecRequest struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Command     *string                `protobuf:"bytes,1,opt,name=command"`
+	xxx_hidden_Args        []string               `protobuf:"bytes,2,rep,name=args"`
+	xxx_hidden_Stdin       []byte                 `protobuf:"bytes,3,opt,name=stdin"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *ExecRequest) Reset() {
+	*x = ExecRequest{}
+	mi := &file_dev_warashi_muscat_v1_muscat_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ExecRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ExecRequest) ProtoMessage() {}
+
+func (x *ExecRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_dev_warashi_muscat_v1_muscat_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *ExecRequest) GetCommand() string {
+	if x != nil {
+		if x.xxx_hidden_Command != nil {
+			return *x.xxx_hidden_Command
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *ExecRequest) GetArgs() []string {
+	if x != nil {
+		return x.xxx_hidden_Args
+	}
+	return nil
+}
+
+func (x *ExecRequest) GetStdin() []byte {
+	if x != nil {
+		return x.xxx_hidden_Stdin
+	}
+	return nil
+}
+
+func (x *ExecRequest) SetCommand(v string) {
+	x.xxx_hidden_Command = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 3)
+}
+
+func (x *ExecRequest) SetArgs(v []string) {
+	x.xxx_hidden_Args = v
+}
+
+func (x *ExecRequest) SetStdin(v []byte) {
+	if v == nil {
+		v = []byte{}
+	}
+	x.xxx_hidden_Stdin = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 3)
+}
+
+func (x *ExecRequest) HasCommand() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *ExecRequest) HasStdin() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
+}
+
+func (x *ExecRequest) ClearCommand() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Command = nil
+}
+
+func (x *ExecRequest) ClearStdin() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
+	x.xxx_hidden_Stdin = nil
+}
+
+type ExecRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Command *string
+	Args    []string
+	Stdin   []byte
+}
+
+func (b0 ExecRequest_builder) Build() *ExecRequest {
+	m0 := &ExecRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Command != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 3)
+		x.xxx_hidden_Command = b.Command
+	}
+	x.xxx_hidden_Args = b.Args
+	if b.Stdin != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 3)
+		x.xxx_hidden_Stdin = b.Stdin
+	}
+	return m0
+}
+
+type ExecResponse struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Stdout      []byte                 `protobuf:"bytes,1,opt,name=stdout"`
+	xxx_hidden_Stderr      []byte                 `protobuf:"bytes,2,opt,name=stderr"`
+	xxx_hidden_ExitCode    int32                  `protobuf:"varint,3,opt,name=exit_code,json=exitCode"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *ExecResponse) Reset() {
+	*x = ExecResponse{}
+	mi := &file_dev_warashi_muscat_v1_muscat_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ExecResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ExecResponse) ProtoMessage() {}
+
+func (x *ExecResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_dev_warashi_muscat_v1_muscat_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *ExecResponse) GetStdout() []byte {
+	if x != nil {
+		return x.xxx_hidden_Stdout
+	}
+	return nil
+}
+
+func (x *ExecResponse) GetStderr() []byte {
+	if x != nil {
+		return x.xxx_hidden_Stderr
+	}
+	return nil
+}
+
+func (x *ExecResponse) GetExitCode() int32 {
+	if x != nil {
+		return x.xxx_hidden_ExitCode
+	}
+	return 0
+}
+
+func (x *ExecResponse) SetStdout(v []byte) {
+	if v == nil {
+		v = []byte{}
+	}
+	x.xxx_hidden_Stdout = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 3)
+}
+
+func (x *ExecResponse) SetStderr(v []byte) {
+	if v == nil {
+		v = []byte{}
+	}
+	x.xxx_hidden_Stderr = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 3)
+}
+
+func (x *ExecResponse) SetExitCode(v int32) {
+	x.xxx_hidden_ExitCode = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 3)
+}
+
+func (x *ExecResponse) HasStdout() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *ExecResponse) HasStderr() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *ExecResponse) HasExitCode() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
+}
+
+func (x *ExecResponse) ClearStdout() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Stdout = nil
+}
+
+func (x *ExecResponse) ClearStderr() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_Stderr = nil
+}
+
+func (x *ExecResponse) ClearExitCode() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
+	x.xxx_hidden_ExitCode = 0
+}
+
+type ExecResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Stdout   []byte
+	Stderr   []byte
+	ExitCode *int32
+}
+
+func (b0 ExecResponse_builder) Build() *ExecResponse {
+	m0 := &ExecResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Stdout != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 3)
+		x.xxx_hidden_Stdout = b.Stdout
+	}
+	if b.Stderr != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 3)
+		x.xxx_hidden_Stderr = b.Stderr
+	}
+	if b.ExitCode != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 3)
+		x.xxx_hidden_ExitCode = *b.ExitCode
+	}
+	return m0
+}
+
 var File_dev_warashi_muscat_v1_muscat_proto protoreflect.FileDescriptor
 
 const file_dev_warashi_muscat_v1_muscat_proto_rawDesc = "" +
@@ -963,7 +1229,15 @@ const file_dev_warashi_muscat_v1_muscat_proto_rawDesc = "" +
 	"\x12PortForwardRequest\x12\x12\n" +
 	"\x04body\x18\x01 \x01(\fR\x04body\")\n" +
 	"\x13PortForwardResponse\x12\x12\n" +
-	"\x04body\x18\x01 \x01(\fR\x04body2\xa8\x05\n" +
+	"\x04body\x18\x01 \x01(\fR\x04body\"Q\n" +
+	"\vExecRequest\x12\x18\n" +
+	"\acommand\x18\x01 \x01(\tR\acommand\x12\x12\n" +
+	"\x04args\x18\x02 \x03(\tR\x04args\x12\x14\n" +
+	"\x05stdin\x18\x03 \x01(\fR\x05stdin\"[\n" +
+	"\fExecResponse\x12\x16\n" +
+	"\x06stdout\x18\x01 \x01(\fR\x06stdout\x12\x16\n" +
+	"\x06stderr\x18\x02 \x01(\fR\x06stderr\x12\x1b\n" +
+	"\texit_code\x18\x03 \x01(\x05R\bexitCode2\xf9\x05\n" +
 	"\rMuscatService\x12U\n" +
 	"\x06Health\x12$.dev.warashi.muscat.v1.HealthRequest\x1a%.dev.warashi.muscat.v1.HealthResponse\x12O\n" +
 	"\x04Open\x12\".dev.warashi.muscat.v1.OpenRequest\x1a#.dev.warashi.muscat.v1.OpenResponse\x12Q\n" +
@@ -971,9 +1245,10 @@ const file_dev_warashi_muscat_v1_muscat_proto_rawDesc = "" +
 	"\x05Paste\x12#.dev.warashi.muscat.v1.PasteRequest\x1a$.dev.warashi.muscat.v1.PasteResponse0\x01\x12m\n" +
 	"\x0eGetInputMethod\x12,.dev.warashi.muscat.v1.GetInputMethodRequest\x1a-.dev.warashi.muscat.v1.GetInputMethodResponse\x12m\n" +
 	"\x0eSetInputMethod\x12,.dev.warashi.muscat.v1.SetInputMethodRequest\x1a-.dev.warashi.muscat.v1.SetInputMethodResponse\x12h\n" +
-	"\vPortForward\x12).dev.warashi.muscat.v1.PortForwardRequest\x1a*.dev.warashi.muscat.v1.PortForwardResponse(\x010\x01B!Z\x1fgithub.com/Warashi/muscat/v2/pbb\beditionsp\xe8\a"
+	"\vPortForward\x12).dev.warashi.muscat.v1.PortForwardRequest\x1a*.dev.warashi.muscat.v1.PortForwardResponse(\x010\x01\x12O\n" +
+	"\x04Exec\x12\".dev.warashi.muscat.v1.ExecRequest\x1a#.dev.warashi.muscat.v1.ExecResponseB!Z\x1fgithub.com/Warashi/muscat/v2/pbb\beditionsp\xe8\a"
 
-var file_dev_warashi_muscat_v1_muscat_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
+var file_dev_warashi_muscat_v1_muscat_proto_msgTypes = make([]protoimpl.MessageInfo, 16)
 var file_dev_warashi_muscat_v1_muscat_proto_goTypes = []any{
 	(*OpenRequest)(nil),            // 0: dev.warashi.muscat.v1.OpenRequest
 	(*OpenResponse)(nil),           // 1: dev.warashi.muscat.v1.OpenResponse
@@ -989,6 +1264,8 @@ var file_dev_warashi_muscat_v1_muscat_proto_goTypes = []any{
 	(*SetInputMethodResponse)(nil), // 11: dev.warashi.muscat.v1.SetInputMethodResponse
 	(*PortForwardRequest)(nil),     // 12: dev.warashi.muscat.v1.PortForwardRequest
 	(*PortForwardResponse)(nil),    // 13: dev.warashi.muscat.v1.PortForwardResponse
+	(*ExecRequest)(nil),            // 14: dev.warashi.muscat.v1.ExecRequest
+	(*ExecResponse)(nil),           // 15: dev.warashi.muscat.v1.ExecResponse
 }
 var file_dev_warashi_muscat_v1_muscat_proto_depIdxs = []int32{
 	6,  // 0: dev.warashi.muscat.v1.MuscatService.Health:input_type -> dev.warashi.muscat.v1.HealthRequest
@@ -998,15 +1275,17 @@ var file_dev_warashi_muscat_v1_muscat_proto_depIdxs = []int32{
 	8,  // 4: dev.warashi.muscat.v1.MuscatService.GetInputMethod:input_type -> dev.warashi.muscat.v1.GetInputMethodRequest
 	10, // 5: dev.warashi.muscat.v1.MuscatService.SetInputMethod:input_type -> dev.warashi.muscat.v1.SetInputMethodRequest
 	12, // 6: dev.warashi.muscat.v1.MuscatService.PortForward:input_type -> dev.warashi.muscat.v1.PortForwardRequest
-	7,  // 7: dev.warashi.muscat.v1.MuscatService.Health:output_type -> dev.warashi.muscat.v1.HealthResponse
-	1,  // 8: dev.warashi.muscat.v1.MuscatService.Open:output_type -> dev.warashi.muscat.v1.OpenResponse
-	3,  // 9: dev.warashi.muscat.v1.MuscatService.Copy:output_type -> dev.warashi.muscat.v1.CopyResponse
-	5,  // 10: dev.warashi.muscat.v1.MuscatService.Paste:output_type -> dev.warashi.muscat.v1.PasteResponse
-	9,  // 11: dev.warashi.muscat.v1.MuscatService.GetInputMethod:output_type -> dev.warashi.muscat.v1.GetInputMethodResponse
-	11, // 12: dev.warashi.muscat.v1.MuscatService.SetInputMethod:output_type -> dev.warashi.muscat.v1.SetInputMethodResponse
-	13, // 13: dev.warashi.muscat.v1.MuscatService.PortForward:output_type -> dev.warashi.muscat.v1.PortForwardResponse
-	7,  // [7:14] is the sub-list for method output_type
-	0,  // [0:7] is the sub-list for method input_type
+	14, // 7: dev.warashi.muscat.v1.MuscatService.Exec:input_type -> dev.warashi.muscat.v1.ExecRequest
+	7,  // 8: dev.warashi.muscat.v1.MuscatService.Health:output_type -> dev.warashi.muscat.v1.HealthResponse
+	1,  // 9: dev.warashi.muscat.v1.MuscatService.Open:output_type -> dev.warashi.muscat.v1.OpenResponse
+	3,  // 10: dev.warashi.muscat.v1.MuscatService.Copy:output_type -> dev.warashi.muscat.v1.CopyResponse
+	5,  // 11: dev.warashi.muscat.v1.MuscatService.Paste:output_type -> dev.warashi.muscat.v1.PasteResponse
+	9,  // 12: dev.warashi.muscat.v1.MuscatService.GetInputMethod:output_type -> dev.warashi.muscat.v1.GetInputMethodResponse
+	11, // 13: dev.warashi.muscat.v1.MuscatService.SetInputMethod:output_type -> dev.warashi.muscat.v1.SetInputMethodResponse
+	13, // 14: dev.warashi.muscat.v1.MuscatService.PortForward:output_type -> dev.warashi.muscat.v1.PortForwardResponse
+	15, // 15: dev.warashi.muscat.v1.MuscatService.Exec:output_type -> dev.warashi.muscat.v1.ExecResponse
+	8,  // [8:16] is the sub-list for method output_type
+	0,  // [0:8] is the sub-list for method input_type
 	0,  // [0:0] is the sub-list for extension type_name
 	0,  // [0:0] is the sub-list for extension extendee
 	0,  // [0:0] is the sub-list for field type_name
@@ -1023,7 +1302,7 @@ func file_dev_warashi_muscat_v1_muscat_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_dev_warashi_muscat_v1_muscat_proto_rawDesc), len(file_dev_warashi_muscat_v1_muscat_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   14,
+			NumMessages:   16,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

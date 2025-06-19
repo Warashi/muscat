@@ -4,11 +4,13 @@ import (
 	"bufio"
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"log"
 	"net"
 	"os"
+	"os/exec"
 	"sync"
 
 	"connectrpc.com/connect"
@@ -175,4 +177,45 @@ func (*MuscatServer) PortForward(
 	wg.Wait()
 
 	return nil
+}
+
+// Exec implements pbconnect.MuscatServiceHandler.
+func (*MuscatServer) Exec(
+	ctx context.Context,
+	req *connect.Request[pb.ExecRequest],
+) (*connect.Response[pb.ExecResponse], error) {
+	cmd := exec.CommandContext(ctx, req.Msg.GetCommand(), req.Msg.GetArgs()...)
+
+	// Set stdin if provided
+	if stdin := req.Msg.GetStdin(); len(stdin) > 0 {
+		cmd.Stdin = bytes.NewReader(stdin)
+	}
+
+	// Capture stdout and stderr
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	// Execute the command
+	err := cmd.Run()
+
+	// Get exit code
+	exitCode := 0
+	if err != nil {
+		var exitErr *exec.ExitError
+		if errors.As(err, &exitErr) {
+			exitCode = exitErr.ExitCode()
+		} else {
+			// If it's not an ExitError, return an internal error
+			return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("cmd.Run: %w", err))
+		}
+	}
+
+	return connect.NewResponse(
+		pb.ExecResponse_builder{
+			Stdout:   stdout.Bytes(),
+			Stderr:   stderr.Bytes(),
+			ExitCode: proto.Int32(int32(exitCode)),
+		}.Build(),
+	), nil
 }
