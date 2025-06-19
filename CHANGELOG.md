@@ -1,5 +1,8 @@
 # Changelog
 
+## [v2.3.5](https://github.com/Warashi/muscat/compare/v2.3.4...v2.3.5) - 2025-06-19
+- feat: add remote command execution feature by @Warashi in https://github.com/Warashi/muscat/pull/46
+
 ## [v2.3.4](https://github.com/Warashi/muscat/compare/v2.3.3...v2.3.4) - 2025-06-18
 - build(deps): bump github/codeql-action from 3.28.19 to 3.29.0 by @dependabot in https://github.com/Warashi/muscat/pull/43
 - build(deps): bump golang.org/x/net from 0.40.0 to 0.41.0 by @dependabot in https://github.com/Warashi/muscat/pull/39
