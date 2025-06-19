@@ -50,6 +50,18 @@ message PortForwardResponse {
   bytes body = 1;
 }
 
+message ExecRequest {
+  string command = 1;
+  repeated string args = 2;
+  bytes stdin = 3;
+}
+
+message ExecResponse {
+  bytes stdout = 1;
+  bytes stderr = 2;
+  int32 exit_code = 3;
+}
+
 service MuscatService {
   rpc Health(HealthRequest) returns (HealthResponse);
 
@@ -65,4 +77,6 @@ service MuscatService {
   // Forwarded port is send as metadata.
   // 1 connection is 1 stream.
   rpc PortForward(stream PortForwardRequest) returns (stream PortForwardResponse);
+
+  rpc Exec(ExecRequest) returns (ExecResponse);
 }

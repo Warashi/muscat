@@ -207,3 +207,26 @@ func (m *MuscatClient) portForward(ctx context.Context, port string, conn net.Co
 
 	return nil
 }
+
+func (m *MuscatClient) Exec(
+	ctx context.Context,
+	command string,
+	args []string,
+	stdin []byte,
+) (stdout, stderr []byte, exitCode int, err error) {
+	res, err := m.pb.Exec(
+		ctx,
+		connect.NewRequest(
+			pb.ExecRequest_builder{
+				Command: proto.String(command),
+				Args:    args,
+				Stdin:   stdin,
+			}.Build(),
+		),
+	)
+	if err != nil {
+		return nil, nil, 0, fmt.Errorf("m.pb.Exec: %w", err)
+	}
+
+	return res.Msg.GetStdout(), res.Msg.GetStderr(), int(res.Msg.GetExitCode()), nil
+}

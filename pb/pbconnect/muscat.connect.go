@@ -50,6 +50,8 @@ const (
 	// MuscatServicePortForwardProcedure is the fully-qualified name of the MuscatService's PortForward
 	// RPC.
 	MuscatServicePortForwardProcedure = "/dev.warashi.muscat.v1.MuscatService/PortForward"
+	// MuscatServiceExecProcedure is the fully-qualified name of the MuscatService's Exec RPC.
+	MuscatServiceExecProcedure = "/dev.warashi.muscat.v1.MuscatService/Exec"
 )
 
 // MuscatServiceClient is a client for the dev.warashi.muscat.v1.MuscatService service.
@@ -64,6 +66,7 @@ type MuscatServiceClient interface {
 	// Forwarded port is send as metadata.
 	// 1 connection is 1 stream.
 	PortForward(context.Context) *connect.BidiStreamForClient[pb.PortForwardRequest, pb.PortForwardResponse]
+	Exec(context.Context, *connect.Request[pb.ExecRequest]) (*connect.Response[pb.ExecResponse], error)
 }
 
 // NewMuscatServiceClient constructs a client for the dev.warashi.muscat.v1.MuscatService service.
@@ -119,6 +122,12 @@ func NewMuscatServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 			connect.WithSchema(muscatServiceMethods.ByName("PortForward")),
 			connect.WithClientOptions(opts...),
 		),
+		exec: connect.NewClient[pb.ExecRequest, pb.ExecResponse](
+			httpClient,
+			baseURL+MuscatServiceExecProcedure,
+			connect.WithSchema(muscatServiceMethods.ByName("Exec")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -131,6 +140,7 @@ type muscatServiceClient struct {
 	getInputMethod *connect.Client[pb.GetInputMethodRequest, pb.GetInputMethodResponse]
 	setInputMethod *connect.Client[pb.SetInputMethodRequest, pb.SetInputMethodResponse]
 	portForward    *connect.Client[pb.PortForwardRequest, pb.PortForwardResponse]
+	exec           *connect.Client[pb.ExecRequest, pb.ExecResponse]
 }
 
 // Health calls dev.warashi.muscat.v1.MuscatService.Health.
@@ -168,6 +178,11 @@ func (c *muscatServiceClient) PortForward(ctx context.Context) *connect.BidiStre
 	return c.portForward.CallBidiStream(ctx)
 }
 
+// Exec calls dev.warashi.muscat.v1.MuscatService.Exec.
+func (c *muscatServiceClient) Exec(ctx context.Context, req *connect.Request[pb.ExecRequest]) (*connect.Response[pb.ExecResponse], error) {
+	return c.exec.CallUnary(ctx, req)
+}
+
 // MuscatServiceHandler is an implementation of the dev.warashi.muscat.v1.MuscatService service.
 type MuscatServiceHandler interface {
 	Health(context.Context, *connect.Request[pb.HealthRequest]) (*connect.Response[pb.HealthResponse], error)
@@ -180,6 +195,7 @@ type MuscatServiceHandler interface {
 	// Forwarded port is send as metadata.
 	// 1 connection is 1 stream.
 	PortForward(context.Context, *connect.BidiStream[pb.PortForwardRequest, pb.PortForwardResponse]) error
+	Exec(context.Context, *connect.Request[pb.ExecRequest]) (*connect.Response[pb.ExecResponse], error)
 }
 
 // NewMuscatServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -231,6 +247,12 @@ func NewMuscatServiceHandler(svc MuscatServiceHandler, opts ...connect.HandlerOp
 		connect.WithSchema(muscatServiceMethods.ByName("PortForward")),
 		connect.WithHandlerOptions(opts...),
 	)
+	muscatServiceExecHandler := connect.NewUnaryHandler(
+		MuscatServiceExecProcedure,
+		svc.Exec,
+		connect.WithSchema(muscatServiceMethods.ByName("Exec")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/dev.warashi.muscat.v1.MuscatService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case MuscatServiceHealthProcedure:
@@ -247,6 +269,8 @@ func NewMuscatServiceHandler(svc MuscatServiceHandler, opts ...connect.HandlerOp
 			muscatServiceSetInputMethodHandler.ServeHTTP(w, r)
 		case MuscatServicePortForwardProcedure:
 			muscatServicePortForwardHandler.ServeHTTP(w, r)
+		case MuscatServiceExecProcedure:
+			muscatServiceExecHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -282,4 +306,8 @@ func (UnimplementedMuscatServiceHandler) SetInputMethod(context.Context, *connec
 
 func (UnimplementedMuscatServiceHandler) PortForward(context.Context, *connect.BidiStream[pb.PortForwardRequest, pb.PortForwardResponse]) error {
 	return connect.NewError(connect.CodeUnimplemented, errors.New("dev.warashi.muscat.v1.MuscatService.PortForward is not implemented"))
+}
+
+func (UnimplementedMuscatServiceHandler) Exec(context.Context, *connect.Request[pb.ExecRequest]) (*connect.Response[pb.ExecResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("dev.warashi.muscat.v1.MuscatService.Exec is not implemented"))
 }
