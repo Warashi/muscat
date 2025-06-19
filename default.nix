@@ -9,7 +9,7 @@
 }:
 pkgs.buildGoLatestModule {
   pname = "muscat";
-  version = "2.3.4";
+  version = "2.3.5";
   src = ./.;
   vendorHash = "sha256-NtbbweDfkfgDGGec4Rat2Axvcl+r5ibYFsGytVc3TkU=";
 
