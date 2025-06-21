@@ -1,5 +1,8 @@
 # Changelog
 
+## [v2.3.6](https://github.com/Warashi/muscat/compare/v2.3.5...v2.3.6) - 2025-06-21
+- build(deps): bump golang.design/x/clipboard from 0.7.0 to 0.7.1 by @dependabot in https://github.com/Warashi/muscat/pull/48
+
 ## [v2.3.5](https://github.com/Warashi/muscat/compare/v2.3.4...v2.3.5) - 2025-06-19
 - feat: add remote command execution feature by @Warashi in https://github.com/Warashi/muscat/pull/46
 
