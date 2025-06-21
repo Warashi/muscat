@@ -5,13 +5,13 @@
   makeWrapper ? pkgs.makeWrapper,
   lib ? pkgs.lib,
   xorg ? pkgs.xorg,
-  apple-sdk ? pkgs.apple-sdk
+  apple-sdk ? pkgs.apple-sdk,
 }:
 pkgs.buildGoLatestModule {
   pname = "muscat";
   version = "2.3.5";
   src = ./.;
-  vendorHash = "sha256-NtbbweDfkfgDGGec4Rat2Axvcl+r5ibYFsGytVc3TkU=";
+  vendorHash = "sha256-AxVnK1swRgO6BCgn5sifEuEwnF4ThcNvqeSVUNRRZV4=";
 
   tags = if useGolangDesign then [ "golangdesign" ] else [ ];
 
