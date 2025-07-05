@@ -1,5 +1,12 @@
 # Changelog
 
+## [v2.3.7](https://github.com/Warashi/muscat/compare/v2.3.6...v2.3.7) - 2025-07-05
+- build(deps): bump nixbuild/nix-quick-install-action from 30 to 31 by @dependabot in https://github.com/Warashi/muscat/pull/50
+- build(deps): bump Songmu/tagpr from 1.6.1 to 1.7.0 by @dependabot in https://github.com/Warashi/muscat/pull/51
+- build(deps): bump nixbuild/nix-quick-install-action from 31 to 32 by @dependabot in https://github.com/Warashi/muscat/pull/53
+- build(deps): bump github/codeql-action from 3.29.0 to 3.29.1 by @dependabot in https://github.com/Warashi/muscat/pull/54
+- build(deps): bump github/codeql-action from 3.29.1 to 3.29.2 by @dependabot in https://github.com/Warashi/muscat/pull/55
+
 ## [v2.3.6](https://github.com/Warashi/muscat/compare/v2.3.5...v2.3.6) - 2025-06-21
 - build(deps): bump golang.design/x/clipboard from 0.7.0 to 0.7.1 by @dependabot in https://github.com/Warashi/muscat/pull/48
 
