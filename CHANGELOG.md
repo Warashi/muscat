@@ -1,5 +1,10 @@
 # Changelog
 
+## [v2.3.8](https://github.com/Warashi/muscat/compare/v2.3.7...v2.3.8) - 2025-08-09
+- build(deps): bump github/codeql-action from 3.29.2 to 3.29.4 by @dependabot[bot] in https://github.com/Warashi/muscat/pull/57
+- build(deps): bump github/codeql-action from 3.29.4 to 3.29.5 by @dependabot[bot] in https://github.com/Warashi/muscat/pull/59
+- build(deps): update deps by @Warashi in https://github.com/Warashi/muscat/pull/62
+
 ## [v2.3.7](https://github.com/Warashi/muscat/compare/v2.3.6...v2.3.7) - 2025-07-12
 - build(deps): bump nixbuild/nix-quick-install-action from 30 to 31 by @dependabot[bot] in https://github.com/Warashi/muscat/pull/50
 - build(deps): bump Songmu/tagpr from 1.6.1 to 1.7.0 by @dependabot[bot] in https://github.com/Warashi/muscat/pull/51
