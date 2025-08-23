@@ -1,5 +1,14 @@
 # Changelog
 
+## [v2.3.9](https://github.com/Warashi/muscat/compare/v2.3.8...v2.3.9) - 2025-08-23
+- build(deps): bump actions/create-github-app-token from 2.0.6 to 2.1.0 by @dependabot[bot] in https://github.com/Warashi/muscat/pull/64
+- build(deps): bump github/codeql-action from 3.29.7 to 3.29.8 by @dependabot[bot] in https://github.com/Warashi/muscat/pull/63
+- build(deps): bump github/codeql-action from 3.29.8 to 3.29.9 by @dependabot[bot] in https://github.com/Warashi/muscat/pull/66
+- build(deps): bump actions/checkout from 4.2.2 to 5.0.0 by @dependabot[bot] in https://github.com/Warashi/muscat/pull/67
+- build(deps): bump actions/create-github-app-token from 2.1.0 to 2.1.1 by @dependabot[bot] in https://github.com/Warashi/muscat/pull/68
+- build(deps): bump github/codeql-action from 3.29.9 to 3.29.11 by @dependabot[bot] in https://github.com/Warashi/muscat/pull/69
+- build(deps): bump google.golang.org/protobuf from 1.36.7 to 1.36.8 by @dependabot[bot] in https://github.com/Warashi/muscat/pull/70
+
 ## [v2.3.8](https://github.com/Warashi/muscat/compare/v2.3.7...v2.3.8) - 2025-08-09
 - build(deps): bump github/codeql-action from 3.29.2 to 3.29.4 by @dependabot[bot] in https://github.com/Warashi/muscat/pull/57
 - build(deps): bump github/codeql-action from 3.29.4 to 3.29.5 by @dependabot[bot] in https://github.com/Warashi/muscat/pull/59
