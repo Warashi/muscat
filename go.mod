@@ -10,7 +10,7 @@ require (
 	github.com/spf13/cobra v1.9.1
 	golang.design/x/clipboard v0.7.1
 	golang.org/x/net v0.43.0
-	google.golang.org/protobuf v1.36.7
+	google.golang.org/protobuf v1.36.8
 )
 
 require (
