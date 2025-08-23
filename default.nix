@@ -11,7 +11,7 @@ pkgs.buildGoLatestModule {
   pname = "muscat";
   version = "2.3.8";
   src = ./.;
-  vendorHash = "sha256-Gc2PZM8HB3boMoy+PnAsLA82WPmhggZoEU0yMeVz9Io=";
+  vendorHash = "sha256-gL6k1gIUzC/MbQpGpnGZ+bxdhTve9Zo7AUpsQcB4hcA=";
 
   tags = if useGolangDesign then [ "golangdesign" ] else [ ];
 
