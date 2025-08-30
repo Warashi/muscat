@@ -1,5 +1,8 @@
 # Changelog
 
+## [v2.3.10](https://github.com/Warashi/muscat/compare/v2.3.9...v2.3.10) - 2025-08-30
+- build(deps): bump nixbuild/nix-quick-install-action from 32 to 33 by @dependabot[bot] in https://github.com/Warashi/muscat/pull/71
+
 ## [v2.3.9](https://github.com/Warashi/muscat/compare/v2.3.8...v2.3.9) - 2025-08-23
 - build(deps): bump actions/create-github-app-token from 2.0.6 to 2.1.0 by @dependabot[bot] in https://github.com/Warashi/muscat/pull/64
 - build(deps): bump github/codeql-action from 3.29.7 to 3.29.8 by @dependabot[bot] in https://github.com/Warashi/muscat/pull/63
