@@ -1,5 +1,11 @@
 # Changelog
 
+## [v2.3.11](https://github.com/Warashi/muscat/compare/v2.3.10...v2.3.11) - 2025-09-13
+- build(deps): bump github/codeql-action from 3.30.1 to 3.30.3 by @dependabot[bot] in https://github.com/Warashi/muscat/pull/79
+- build(deps): bump Songmu/tagpr from 1.7.2 to 1.9.0 by @dependabot[bot] in https://github.com/Warashi/muscat/pull/80
+- build(deps): bump actions/create-github-app-token from 2.1.1 to 2.1.2 by @dependabot[bot] in https://github.com/Warashi/muscat/pull/81
+- build: update deps by @Warashi in https://github.com/Warashi/muscat/pull/83
+
 ## [v2.3.10](https://github.com/Warashi/muscat/compare/v2.3.9...v2.3.10) - 2025-09-06
 - build(deps): bump nixbuild/nix-quick-install-action from 32 to 33 by @dependabot[bot] in https://github.com/Warashi/muscat/pull/71
 - build(deps): bump github.com/spf13/cobra from 1.9.1 to 1.10.1 by @dependabot[bot] in https://github.com/Warashi/muscat/pull/73
