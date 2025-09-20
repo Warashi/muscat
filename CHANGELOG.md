@@ -1,5 +1,8 @@
 # Changelog
 
+## [v2.3.12](https://github.com/Warashi/muscat/compare/v2.3.11...v2.3.12) - 2025-09-20
+- build(deps): bump actions/create-github-app-token from 2.1.2 to 2.1.4 by @dependabot[bot] in https://github.com/Warashi/muscat/pull/84
+
 ## [v2.3.11](https://github.com/Warashi/muscat/compare/v2.3.10...v2.3.11) - 2025-09-13
 - build(deps): bump github/codeql-action from 3.30.1 to 3.30.3 by @dependabot[bot] in https://github.com/Warashi/muscat/pull/79
 - build(deps): bump Songmu/tagpr from 1.7.2 to 1.9.0 by @dependabot[bot] in https://github.com/Warashi/muscat/pull/80
