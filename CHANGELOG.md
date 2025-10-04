@@ -1,5 +1,9 @@
 # Changelog
 
+## [v2.3.13](https://github.com/Warashi/muscat/compare/v2.3.12...v2.3.13) - 2025-10-04
+- build(deps): bump github/codeql-action from 3.30.5 to 3.30.6 by @dependabot[bot] in https://github.com/Warashi/muscat/pull/90
+- build(deps): bump google.golang.org/protobuf from 1.36.9 to 1.36.10 by @dependabot[bot] in https://github.com/Warashi/muscat/pull/89
+
 ## [v2.3.12](https://github.com/Warashi/muscat/compare/v2.3.11...v2.3.12) - 2025-09-29
 - build(deps): bump actions/create-github-app-token from 2.1.2 to 2.1.4 by @dependabot[bot] in https://github.com/Warashi/muscat/pull/84
 - build(deps): bump nixbuild/nix-quick-install-action from 33 to 34 by @dependabot[bot] in https://github.com/Warashi/muscat/pull/88
