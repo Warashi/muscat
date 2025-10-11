@@ -3,7 +3,7 @@ module github.com/Warashi/muscat/v2
 go 1.24.3
 
 require (
-	connectrpc.com/connect v1.19.0
+	connectrpc.com/connect v1.19.1
 	github.com/Warashi/go-swim v0.0.0-20220912062543-3596431113e5
 	github.com/atotto/clipboard v0.1.4
 	github.com/skratchdot/open-golang v0.0.0-20200116055534-eef842397966
