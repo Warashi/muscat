@@ -1,5 +1,9 @@
 # Changelog
 
+## [v2.3.14](https://github.com/Warashi/muscat/compare/v2.3.13...v2.3.14) - 2025-10-13
+- build(deps): bump github/codeql-action from 3.30.6 to 4.30.8 by @dependabot[bot] in https://github.com/Warashi/muscat/pull/94
+- build(deps): update all deps by @Warashi in https://github.com/Warashi/muscat/pull/96
+
 ## [v2.3.13](https://github.com/Warashi/muscat/compare/v2.3.12...v2.3.13) - 2025-10-04
 - build(deps): bump github/codeql-action from 3.30.5 to 3.30.6 by @dependabot[bot] in https://github.com/Warashi/muscat/pull/90
 - build(deps): bump google.golang.org/protobuf from 1.36.9 to 1.36.10 by @dependabot[bot] in https://github.com/Warashi/muscat/pull/89
