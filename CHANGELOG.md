@@ -1,5 +1,9 @@
 # Changelog
 
+## [Unreleased](https://github.com/Warashi/muscat/compare/v2.3.14...HEAD)
+- feat: introduce `muscat expose-port` for reverse port exposure with optional `--auto` watcher
+- docs: refresh README and add a dedicated expose-port guide while keeping the legacy `port-forward` command
+
 ## [v2.3.14](https://github.com/Warashi/muscat/compare/v2.3.13...v2.3.14) - 2025-10-13
 - build(deps): bump github/codeql-action from 3.30.6 to 4.30.8 by @dependabot[bot] in https://github.com/Warashi/muscat/pull/94
 - build(deps): update all deps by @Warashi in https://github.com/Warashi/muscat/pull/96
