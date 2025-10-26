@@ -4,10 +4,12 @@ import (
 	"bytes"
 	"context"
 	"testing"
+	"time"
 
 	"github.com/spf13/cobra"
 
 	clientexposeport "github.com/Warashi/muscat/v2/client/exposeport"
+	"github.com/Warashi/muscat/v2/client/portwatcher"
 )
 
 func TestParsePortSpec(t *testing.T) {
@@ -97,6 +99,15 @@ func TestExposePortManual(t *testing.T) {
 	if capturedOpts.bindAddress != "127.0.0.1" {
 		t.Fatalf("expected default bind address, got %q", capturedOpts.bindAddress)
 	}
+	if capturedOpts.autoInterval != portwatcher.DefaultInterval {
+		t.Fatalf("expected default auto interval, got %v", capturedOpts.autoInterval)
+	}
+	if len(capturedOpts.autoExclude) != 0 {
+		t.Fatalf("expected no auto exclude ports, got %v", capturedOpts.autoExclude)
+	}
+	if len(capturedOpts.autoExcludeProcess) != 0 {
+		t.Fatalf("expected no auto exclude processes, got %v", capturedOpts.autoExcludeProcess)
+	}
 }
 
 func TestExposePortRequiresPorts(t *testing.T) {
@@ -119,23 +130,71 @@ func TestExposePortRequiresPorts(t *testing.T) {
 	}
 }
 
-func TestExposePortAutoNotImplemented(t *testing.T) {
+func TestExposePortAuto(t *testing.T) {
 	t.Parallel()
+
+	fakeMgr := &fakeExposePortManager{}
+	var (
+		started   bool
+		gotOpts   exposePortOptions
+		gotManual map[uint16]struct{}
+	)
 
 	deps := exposePortDeps{
 		newManager: func(context.Context, *cobra.Command, exposePortOptions) (exposePortManager, error) {
-			return &fakeExposePortManager{}, nil
+			return fakeMgr, nil
 		},
 		wait: func(context.Context) error { return nil },
+		startAuto: func(ctx context.Context, cmd *cobra.Command, opts exposePortOptions, manager exposePortManager, manual map[uint16]struct{}) error {
+			started = true
+			gotOpts = opts
+			copied := make(map[uint16]struct{}, len(manual))
+			for k, v := range manual {
+				copied[k] = v
+			}
+			gotManual = copied
+			return nil
+		},
 	}
 
 	command := newExposePortCmd(deps)
 	command.SetContext(context.Background())
-	command.SetArgs([]string{"--auto"})
+	var stdout, stderr bytes.Buffer
+	command.SetOut(&stdout)
+	command.SetErr(&stderr)
+	command.SetArgs([]string{
+		"--auto",
+		"--auto-interval", "2s",
+		"--auto-exclude", "1000",
+		"--auto-exclude", "2000",
+		"--auto-exclude-process", "foo",
+		"--auto-exclude-process", "bar",
+		"5000",
+	})
 
-	err := command.Execute()
-	if err == nil || err.Error() != "--auto is not implemented yet" {
-		t.Fatalf("unexpected error: %v", err)
+	if err := command.Execute(); err != nil {
+		t.Fatalf("command.Execute: %v", err)
+	}
+
+	if !started {
+		t.Fatalf("startAuto was not called")
+	}
+	if gotOpts.autoInterval != 2*time.Second {
+		t.Fatalf("unexpected auto interval: %v", gotOpts.autoInterval)
+	}
+	if len(gotOpts.autoExclude) != 2 || gotOpts.autoExclude[0] != 1000 ||
+		gotOpts.autoExclude[1] != 2000 {
+		t.Fatalf("unexpected auto exclude ports: %v", gotOpts.autoExclude)
+	}
+	if len(gotOpts.autoExcludeProcess) != 2 || gotOpts.autoExcludeProcess[0] != "foo" ||
+		gotOpts.autoExcludeProcess[1] != "bar" {
+		t.Fatalf("unexpected auto exclude processes: %v", gotOpts.autoExcludeProcess)
+	}
+	if _, ok := gotManual[5000]; !ok {
+		t.Fatalf("manual port not propagated to auto starter")
+	}
+	if len(fakeMgr.exposures) != 1 || fakeMgr.exposures[0].local != 5000 {
+		t.Fatalf("manual exposure not started: %#v", fakeMgr.exposures)
 	}
 }
 

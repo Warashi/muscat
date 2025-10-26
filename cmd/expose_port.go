@@ -9,12 +9,15 @@ import (
 	"os/signal"
 	"strconv"
 	"strings"
+	"sync"
 	"syscall"
+	"time"
 
 	"github.com/spf13/cobra"
 
 	"github.com/Warashi/muscat/v2/client"
 	clientexposeport "github.com/Warashi/muscat/v2/client/exposeport"
+	"github.com/Warashi/muscat/v2/client/portwatcher"
 )
 
 type exposePortManager interface {
@@ -26,14 +29,18 @@ type exposePortManager interface {
 type exposePortDeps struct {
 	newManager func(context.Context, *cobra.Command, exposePortOptions) (exposePortManager, error)
 	wait       func(context.Context) error
+	startAuto  func(context.Context, *cobra.Command, exposePortOptions, exposePortManager, map[uint16]struct{}) error
 }
 
 type exposePortOptions struct {
-	bindAddress  string
-	public       bool
-	remotePolicy clientexposeport.RemotePortPolicy
-	auto         bool
-	manual       []portSpec
+	bindAddress        string
+	public             bool
+	remotePolicy       clientexposeport.RemotePortPolicy
+	auto               bool
+	manual             []portSpec
+	autoInterval       time.Duration
+	autoExclude        []uint16
+	autoExcludeProcess []string
 }
 
 type portSpec struct {
@@ -47,6 +54,7 @@ var defaultExposePortDeps = exposePortDeps{
 		<-ctx.Done()
 		return ctx.Err()
 	},
+	startAuto: startAutoExpose,
 }
 
 // exposePortCmd represents the expose-port command.
@@ -63,10 +71,7 @@ as the local port is requested.`,
 			if err != nil {
 				return err
 			}
-			if opts.auto {
-				return errors.New("--auto is not implemented yet")
-			}
-			if len(opts.manual) == 0 {
+			if len(opts.manual) == 0 && !opts.auto {
 				return errors.New("at least one port must be specified")
 			}
 			ctx, cancel := signal.NotifyContext(cmd.Context(), os.Interrupt, syscall.SIGTERM)
@@ -78,14 +83,40 @@ as the local port is requested.`,
 			}
 			defer manager.Shutdown()
 
+			manualSet := make(map[uint16]struct{}, len(opts.manual))
 			for _, spec := range opts.manual {
 				if err := manager.Expose(ctx, spec.local, spec.remote); err != nil {
 					return err
 				}
+				manualSet[spec.local] = struct{}{}
 			}
 
-			if err := deps.wait(ctx); err != nil && !errors.Is(err, context.Canceled) {
-				return err
+			errCh := make(chan error, 2)
+			go func() {
+				errCh <- deps.wait(ctx)
+			}()
+			expected := 1
+
+			if opts.auto {
+				if deps.startAuto == nil {
+					return errors.New("auto mode is not supported")
+				}
+				expected++
+				go func() {
+					errCh <- deps.startAuto(ctx, cmd, opts, manager, manualSet)
+				}()
+			}
+
+			var firstErr error
+			for i := 0; i < expected; i++ {
+				if err := <-errCh; err != nil && !errors.Is(err, context.Canceled) &&
+					firstErr == nil {
+					firstErr = err
+					cancel()
+				}
+			}
+			if firstErr != nil {
+				return firstErr
 			}
 			return nil
 		},
@@ -97,6 +128,11 @@ as the local port is requested.`,
 	cmd.Flags().Bool("public", false, "Shortcut for bind-address=0.0.0.0")
 	cmd.Flags().String("remote-policy", "fail", "Remote port conflict policy: fail|next-free|skip")
 	cmd.Flags().Bool("auto", false, "Automatically expose newly opened local ports")
+	cmd.Flags().
+		Duration("auto-interval", portwatcher.DefaultInterval, "Polling interval used by --auto")
+	cmd.Flags().UintSlice("auto-exclude", nil, "Ports to exclude from automatic exposure")
+	cmd.Flags().
+		StringSlice("auto-exclude-process", nil, "Process names to exclude from automatic exposure")
 
 	return cmd
 }
@@ -128,17 +164,45 @@ func parseExposePortOptions(cmd *cobra.Command, args []string) (exposePortOption
 		return exposePortOptions{}, err
 	}
 
+	autoInterval, err := cmd.Flags().GetDuration("auto-interval")
+	if err != nil {
+		return exposePortOptions{}, err
+	}
+	if autoInterval <= 0 {
+		autoInterval = portwatcher.DefaultInterval
+	}
+
+	autoExcludeRaw, err := cmd.Flags().GetUintSlice("auto-exclude")
+	if err != nil {
+		return exposePortOptions{}, err
+	}
+	autoExclude := make([]uint16, 0, len(autoExcludeRaw))
+	for _, v := range autoExcludeRaw {
+		if v > 65535 {
+			return exposePortOptions{}, fmt.Errorf("auto exclude port %d out of range", v)
+		}
+		autoExclude = append(autoExclude, uint16(v))
+	}
+
+	autoExcludeProcess, err := cmd.Flags().GetStringSlice("auto-exclude-process")
+	if err != nil {
+		return exposePortOptions{}, err
+	}
+
 	manual, err := parsePortSpecs(args)
 	if err != nil {
 		return exposePortOptions{}, err
 	}
 
 	return exposePortOptions{
-		bindAddress:  bindAddress,
-		public:       public,
-		remotePolicy: policy,
-		auto:         auto,
-		manual:       manual,
+		bindAddress:        bindAddress,
+		public:             public,
+		remotePolicy:       policy,
+		auto:               auto,
+		manual:             manual,
+		autoInterval:       autoInterval,
+		autoExclude:        autoExclude,
+		autoExcludeProcess: autoExcludeProcess,
 	}, nil
 }
 
@@ -192,6 +256,77 @@ func parsePortNumber(value string, allowZero bool) (uint16, error) {
 		return 0, errors.New("port must be <= 65535")
 	}
 	return uint16(port), nil
+}
+
+func startAutoExpose(
+	ctx context.Context,
+	cmd *cobra.Command,
+	opts exposePortOptions,
+	manager exposePortManager,
+	manual map[uint16]struct{},
+) error {
+	logger := log.New(cmd.ErrOrStderr(), "", log.LstdFlags)
+	pwCfg := portwatcher.Config{
+		ExcludePorts:     append([]uint16(nil), opts.autoExclude...),
+		ExcludeProcesses: append([]string(nil), opts.autoExcludeProcess...),
+	}
+	watcherOpts := []portwatcher.Option{
+		portwatcher.WithLogger(logger),
+	}
+	if opts.autoInterval > 0 {
+		watcherOpts = append(watcherOpts, portwatcher.WithInterval(opts.autoInterval))
+	}
+
+	watcher := portwatcher.New(pwCfg, watcherOpts...)
+
+	active := make(map[uint16]struct{})
+	var mu sync.Mutex
+
+	handler := func(diff portwatcher.Diff) {
+		var toStart, toStop []uint16
+
+		mu.Lock()
+		for _, entry := range diff.Added {
+			if _, ok := manual[entry.Port]; ok {
+				continue
+			}
+			if _, ok := active[entry.Port]; ok {
+				continue
+			}
+			active[entry.Port] = struct{}{}
+			toStart = append(toStart, entry.Port)
+		}
+		for _, entry := range diff.Removed {
+			if _, ok := manual[entry.Port]; ok {
+				continue
+			}
+			if _, ok := active[entry.Port]; ok {
+				delete(active, entry.Port)
+				toStop = append(toStop, entry.Port)
+			}
+		}
+		mu.Unlock()
+
+		for _, port := range toStart {
+			if err := manager.Expose(ctx, port, port); err != nil {
+				mu.Lock()
+				delete(active, port)
+				mu.Unlock()
+				fmt.Fprintf(cmd.ErrOrStderr(), "failed to auto expose port %d: %v\n", port, err)
+				continue
+			}
+			fmt.Fprintf(cmd.OutOrStdout(), "auto exposing local %d\n", port)
+		}
+		for _, port := range toStop {
+			manager.Stop(port)
+			fmt.Fprintf(cmd.OutOrStdout(), "auto stopped local %d\n", port)
+		}
+	}
+
+	if err := watcher.Start(ctx, handler); err != nil && !errors.Is(err, context.Canceled) {
+		return err
+	}
+	return nil
 }
 
 func newDefaultExposePortManager(
