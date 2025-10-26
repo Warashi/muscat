@@ -30,6 +30,9 @@ type Config struct {
 	Dial         DialFunc
 	LocalAddress string
 	ChunkSize    int
+	OnOpen       func(*pb.ExposePortConnectionOpen)
+	OnClose      func(*pb.ExposePortConnectionClose)
+	OnError      func(error)
 }
 
 // Session handles the client side of ExposePort.
@@ -50,6 +53,9 @@ type sessionConfig struct {
 	dial         DialFunc
 	localAddress string
 	chunkSize    int
+	onOpen       func(*pb.ExposePortConnectionOpen)
+	onClose      func(*pb.ExposePortConnectionClose)
+	onError      func(error)
 }
 
 const (
@@ -63,6 +69,9 @@ func NewSession(ctx context.Context, stream Stream, init *pb.ExposePortInit, cfg
 		dial:         (&net.Dialer{}).DialContext,
 		localAddress: cfg.LocalAddress,
 		chunkSize:    cfg.ChunkSize,
+		onOpen:       cfg.OnOpen,
+		onClose:      cfg.OnClose,
+		onError:      cfg.OnError,
 	}
 	if sessionCfg.localAddress == "" {
 		sessionCfg.localAddress = defaultLocalAddress
@@ -144,7 +153,11 @@ func (s *Session) receiveLoop(ctx context.Context) error {
 		case resp.GetClose() != nil:
 			s.handleClose(resp.GetClose())
 		case resp.GetError() != nil:
-			return errors.New(resp.GetError().GetMessage())
+			err := errors.New(resp.GetError().GetMessage())
+			if s.cfg.onError != nil {
+				s.cfg.onError(err)
+			}
+			return err
 		default:
 			// ignore
 		}
@@ -162,6 +175,9 @@ func (s *Session) handleOpen(ctx context.Context, open *pb.ExposePortConnectionO
 	if err := s.storeConnection(clientConn); err != nil {
 		conn.Close()
 		return s.sendCloseWithError(open.GetConnectionId(), err.Error(), true)
+	}
+	if s.cfg.onOpen != nil {
+		s.cfg.onOpen(proto.Clone(open).(*pb.ExposePortConnectionOpen))
 	}
 
 	s.wg.Add(2)
@@ -239,6 +255,9 @@ func (s *Session) handleData(data *pb.ExposePortConnectionData) {
 }
 
 func (s *Session) handleClose(close *pb.ExposePortConnectionClose) {
+	if s.cfg.onClose != nil {
+		s.cfg.onClose(proto.Clone(close).(*pb.ExposePortConnectionClose))
+	}
 	s.finishConnection(close.GetConnectionId(), close.GetError(), close.GetReset(), false)
 }
 

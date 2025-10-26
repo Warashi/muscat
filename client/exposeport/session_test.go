@@ -6,6 +6,7 @@ import (
 	"errors"
 	"io"
 	"net"
+	"sync"
 	"testing"
 	"time"
 
@@ -267,4 +268,138 @@ func (t *testStream) SendResponse(resp *pb.ExposePortResponse) {
 
 func (t *testStream) CloseResponses() {
 	close(t.responseCh)
+}
+
+func TestSessionEventHandlers(t *testing.T) {
+	t.Parallel()
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	stream := newTestStream(ctx)
+	init := pb.ExposePortInit_builder{
+		LocalPort: proto.Uint32(12345),
+	}.Build()
+
+	type event struct {
+		kind string
+		data any
+	}
+	eventCh := make(chan event, 3)
+
+	var dialMu sync.Mutex
+	var peers []net.Conn
+	session := NewSession(
+		ctx,
+		stream,
+		init,
+		Config{
+			Dial: func(context.Context, string, string) (net.Conn, error) {
+				clientConn, serverConn := net.Pipe()
+				dialMu.Lock()
+				peers = append(peers, serverConn)
+				dialMu.Unlock()
+				return clientConn, nil
+			},
+			OnOpen: func(open *pb.ExposePortConnectionOpen) {
+				eventCh <- event{kind: "open", data: open}
+			},
+			OnClose: func(close *pb.ExposePortConnectionClose) {
+				eventCh <- event{kind: "close", data: close}
+			},
+			OnError: func(err error) {
+				eventCh <- event{kind: "error", data: err}
+			},
+		},
+	)
+
+	errCh := make(chan error, 1)
+	go func() {
+		errCh <- session.Run()
+	}()
+
+	req := stream.NextRequest(t)
+	if req.GetInit() == nil {
+		t.Fatalf("expected init request, got %v", req.WhichFrame())
+	}
+
+	openFrame := pb.ExposePortResponse_builder{
+		Open: pb.ExposePortConnectionOpen_builder{
+			ConnectionId:  proto.Uint64(1),
+			RemotePort:    proto.Uint32(8080),
+			RemoteAddress: proto.String("remote:1234"),
+		}.Build(),
+	}.Build()
+	stream.SendResponse(openFrame)
+
+	select {
+	case ev := <-eventCh:
+		open := ev.data.(*pb.ExposePortConnectionOpen)
+		if ev.kind != "open" {
+			t.Fatalf("expected open event, got %s", ev.kind)
+		}
+		if open.GetConnectionId() != 1 || open.GetRemotePort() != 8080 {
+			t.Fatalf("unexpected open payload: %#v", open)
+		}
+	case <-time.After(time.Second):
+		t.Fatalf("timeout waiting for open event")
+	}
+
+	closeFrame := pb.ExposePortResponse_builder{
+		Close: pb.ExposePortConnectionClose_builder{
+			ConnectionId: proto.Uint64(1),
+			Error:        proto.String("done"),
+			Reset:        proto.Bool(false),
+		}.Build(),
+	}.Build()
+	stream.SendResponse(closeFrame)
+
+	select {
+	case ev := <-eventCh:
+		closeMsg := ev.data.(*pb.ExposePortConnectionClose)
+		if ev.kind != "close" {
+			t.Fatalf("expected close event, got %s", ev.kind)
+		}
+		if closeMsg.GetError() != "done" {
+			t.Fatalf("unexpected close payload: %#v", closeMsg)
+		}
+	case <-time.After(time.Second):
+		t.Fatalf("timeout waiting for close event")
+	}
+
+	errorFrame := pb.ExposePortResponse_builder{
+		Error: pb.ExposePortError_builder{
+			Message: proto.String("listener failed"),
+		}.Build(),
+	}.Build()
+	stream.SendResponse(errorFrame)
+	stream.CloseResponses()
+
+	select {
+	case ev := <-eventCh:
+		err, ok := ev.data.(error)
+		if ev.kind != "error" || !ok {
+			t.Fatalf("expected error event, got %#v", ev)
+		}
+		if err.Error() != "listener failed" {
+			t.Fatalf("unexpected error event: %v", err)
+		}
+	case <-time.After(time.Second):
+		t.Fatalf("timeout waiting for error event")
+	}
+
+	select {
+	case err := <-errCh:
+		if err == nil || err.Error() != "listener failed" {
+			t.Fatalf("unexpected session result: %v", err)
+		}
+	case <-time.After(time.Second):
+		t.Fatalf("timeout waiting for session termination")
+	}
+
+	dialMu.Lock()
+	for _, conn := range peers {
+		_ = conn.Close()
+	}
+	dialMu.Unlock()
 }
