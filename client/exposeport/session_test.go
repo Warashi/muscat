@@ -13,6 +13,7 @@ import (
 	"google.golang.org/protobuf/proto"
 
 	"github.com/Warashi/muscat/v2/pb"
+	testexposeport "github.com/Warashi/muscat/v2/testutil/exposeport"
 )
 
 func TestSessionDataFlow(t *testing.T) {
@@ -21,7 +22,7 @@ func TestSessionDataFlow(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	stream := newTestStream(ctx)
+	stream := testexposeport.NewFakeClientStream(ctx)
 
 	listener, err := net.Listen("tcp", "127.0.0.1:0")
 	if err != nil {
@@ -147,7 +148,7 @@ func TestSessionHandleDialError(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	stream := newTestStream(ctx)
+	stream := testexposeport.NewFakeClientStream(ctx)
 
 	init := pb.ExposePortInit_builder{
 		LocalPort: proto.Uint32(12345),
@@ -208,75 +209,13 @@ func TestSessionHandleDialError(t *testing.T) {
 	}
 }
 
-type testStream struct {
-	ctx        context.Context
-	requestCh  chan *pb.ExposePortRequest
-	responseCh chan *pb.ExposePortResponse
-}
-
-func newTestStream(ctx context.Context) *testStream {
-	return &testStream{
-		ctx:        ctx,
-		requestCh:  make(chan *pb.ExposePortRequest, 16),
-		responseCh: make(chan *pb.ExposePortResponse, 16),
-	}
-}
-
-func (t *testStream) Send(req *pb.ExposePortRequest) error {
-	select {
-	case <-t.ctx.Done():
-		return t.ctx.Err()
-	case t.requestCh <- req:
-		return nil
-	}
-}
-
-func (t *testStream) Receive() (*pb.ExposePortResponse, error) {
-	select {
-	case <-t.ctx.Done():
-		return nil, t.ctx.Err()
-	case resp, ok := <-t.responseCh:
-		if !ok {
-			return nil, io.EOF
-		}
-		return resp, nil
-	}
-}
-
-func (t *testStream) CloseRequest() error {
-	return nil
-}
-
-func (t *testStream) CloseResponse() error {
-	return nil
-}
-
-func (t *testStream) NextRequest(tb testing.TB) *pb.ExposePortRequest {
-	tb.Helper()
-	select {
-	case req := <-t.requestCh:
-		return req
-	case <-time.After(time.Second):
-		tb.Fatalf("timeout waiting for request")
-		return nil
-	}
-}
-
-func (t *testStream) SendResponse(resp *pb.ExposePortResponse) {
-	t.responseCh <- resp
-}
-
-func (t *testStream) CloseResponses() {
-	close(t.responseCh)
-}
-
 func TestSessionEventHandlers(t *testing.T) {
 	t.Parallel()
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	stream := newTestStream(ctx)
+	stream := testexposeport.NewFakeClientStream(ctx)
 	init := pb.ExposePortInit_builder{
 		LocalPort: proto.Uint32(12345),
 	}.Build()
@@ -402,4 +341,105 @@ func TestSessionEventHandlers(t *testing.T) {
 		_ = conn.Close()
 	}
 	dialMu.Unlock()
+}
+
+func TestSessionDuplicateConnectionId(t *testing.T) {
+	t.Parallel()
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	stream := testexposeport.NewFakeClientStream(ctx)
+
+	type pipe struct {
+		client net.Conn
+		server net.Conn
+	}
+	var pipeMu sync.Mutex
+	var pipes []pipe
+
+	session := NewSession(
+		ctx,
+		stream,
+		pb.ExposePortInit_builder{
+			LocalPort: proto.Uint32(3210),
+		}.Build(),
+		Config{
+			Dial: func(context.Context, string, string) (net.Conn, error) {
+				c, s := net.Pipe()
+				pipeMu.Lock()
+				pipes = append(pipes, pipe{client: c, server: s})
+				pipeMu.Unlock()
+				return c, nil
+			},
+		},
+	)
+
+	errCh := make(chan error, 1)
+	go func() {
+		errCh <- session.Run()
+	}()
+
+	req := stream.NextRequest(t)
+	if req.GetInit() == nil {
+		t.Fatalf("expected init frame, got %v", req.WhichFrame())
+	}
+
+	stream.SendResponse(
+		pb.ExposePortResponse_builder{
+			Open: pb.ExposePortConnectionOpen_builder{
+				ConnectionId: proto.Uint64(7),
+				RemotePort:   proto.Uint32(8080),
+			}.Build(),
+		}.Build(),
+	)
+
+	stream.SendResponse(
+		pb.ExposePortResponse_builder{
+			Open: pb.ExposePortConnectionOpen_builder{
+				ConnectionId: proto.Uint64(7),
+				RemotePort:   proto.Uint32(9090),
+			}.Build(),
+		}.Build(),
+	)
+
+	closeReq := stream.NextRequest(t)
+	closeFrame := closeReq.GetClose()
+	if closeFrame == nil {
+		t.Fatalf("expected close frame, got %v", closeReq.WhichFrame())
+	}
+	if closeFrame.GetConnectionId() != 7 {
+		t.Fatalf("unexpected connection id: got %d", closeFrame.GetConnectionId())
+	}
+	if closeFrame.GetError() == "" {
+		t.Fatalf("expected duplicate error message")
+	}
+	if !closeFrame.GetReset() {
+		t.Fatalf("expected reset flag on duplicate close")
+	}
+
+	stream.SendResponse(
+		pb.ExposePortResponse_builder{
+			Close: pb.ExposePortConnectionClose_builder{
+				ConnectionId: proto.Uint64(7),
+			}.Build(),
+		}.Build(),
+	)
+	stream.CloseResponses()
+
+	select {
+	case err := <-errCh:
+		if err != nil && !errors.Is(err, io.EOF) && !errors.Is(err, context.Canceled) {
+			t.Fatalf("unexpected session error: %v", err)
+		}
+	case <-time.After(time.Second):
+		t.Fatalf("timeout waiting for session finish")
+	}
+
+	pipeMu.Lock()
+	for _, p := range pipes {
+		_ = p.client.Close()
+		_ = p.server.Close()
+	}
+	pipeMu.Unlock()
 }
