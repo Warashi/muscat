@@ -50,6 +50,9 @@ const (
 	// MuscatServicePortForwardProcedure is the fully-qualified name of the MuscatService's PortForward
 	// RPC.
 	MuscatServicePortForwardProcedure = "/dev.warashi.muscat.v1.MuscatService/PortForward"
+	// MuscatServiceExposePortProcedure is the fully-qualified name of the MuscatService's ExposePort
+	// RPC.
+	MuscatServiceExposePortProcedure = "/dev.warashi.muscat.v1.MuscatService/ExposePort"
 	// MuscatServiceExecProcedure is the fully-qualified name of the MuscatService's Exec RPC.
 	MuscatServiceExecProcedure = "/dev.warashi.muscat.v1.MuscatService/Exec"
 )
@@ -66,6 +69,8 @@ type MuscatServiceClient interface {
 	// Forwarded port is send as metadata.
 	// 1 connection is 1 stream.
 	PortForward(context.Context) *connect.BidiStreamForClient[pb.PortForwardRequest, pb.PortForwardResponse]
+	// ExposePort exposes local listener on the client to the server.
+	ExposePort(context.Context) *connect.BidiStreamForClient[pb.ExposePortRequest, pb.ExposePortResponse]
 	Exec(context.Context, *connect.Request[pb.ExecRequest]) (*connect.Response[pb.ExecResponse], error)
 }
 
@@ -122,6 +127,12 @@ func NewMuscatServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 			connect.WithSchema(muscatServiceMethods.ByName("PortForward")),
 			connect.WithClientOptions(opts...),
 		),
+		exposePort: connect.NewClient[pb.ExposePortRequest, pb.ExposePortResponse](
+			httpClient,
+			baseURL+MuscatServiceExposePortProcedure,
+			connect.WithSchema(muscatServiceMethods.ByName("ExposePort")),
+			connect.WithClientOptions(opts...),
+		),
 		exec: connect.NewClient[pb.ExecRequest, pb.ExecResponse](
 			httpClient,
 			baseURL+MuscatServiceExecProcedure,
@@ -140,6 +151,7 @@ type muscatServiceClient struct {
 	getInputMethod *connect.Client[pb.GetInputMethodRequest, pb.GetInputMethodResponse]
 	setInputMethod *connect.Client[pb.SetInputMethodRequest, pb.SetInputMethodResponse]
 	portForward    *connect.Client[pb.PortForwardRequest, pb.PortForwardResponse]
+	exposePort     *connect.Client[pb.ExposePortRequest, pb.ExposePortResponse]
 	exec           *connect.Client[pb.ExecRequest, pb.ExecResponse]
 }
 
@@ -178,6 +190,11 @@ func (c *muscatServiceClient) PortForward(ctx context.Context) *connect.BidiStre
 	return c.portForward.CallBidiStream(ctx)
 }
 
+// ExposePort calls dev.warashi.muscat.v1.MuscatService.ExposePort.
+func (c *muscatServiceClient) ExposePort(ctx context.Context) *connect.BidiStreamForClient[pb.ExposePortRequest, pb.ExposePortResponse] {
+	return c.exposePort.CallBidiStream(ctx)
+}
+
 // Exec calls dev.warashi.muscat.v1.MuscatService.Exec.
 func (c *muscatServiceClient) Exec(ctx context.Context, req *connect.Request[pb.ExecRequest]) (*connect.Response[pb.ExecResponse], error) {
 	return c.exec.CallUnary(ctx, req)
@@ -195,6 +212,8 @@ type MuscatServiceHandler interface {
 	// Forwarded port is send as metadata.
 	// 1 connection is 1 stream.
 	PortForward(context.Context, *connect.BidiStream[pb.PortForwardRequest, pb.PortForwardResponse]) error
+	// ExposePort exposes local listener on the client to the server.
+	ExposePort(context.Context, *connect.BidiStream[pb.ExposePortRequest, pb.ExposePortResponse]) error
 	Exec(context.Context, *connect.Request[pb.ExecRequest]) (*connect.Response[pb.ExecResponse], error)
 }
 
@@ -247,6 +266,12 @@ func NewMuscatServiceHandler(svc MuscatServiceHandler, opts ...connect.HandlerOp
 		connect.WithSchema(muscatServiceMethods.ByName("PortForward")),
 		connect.WithHandlerOptions(opts...),
 	)
+	muscatServiceExposePortHandler := connect.NewBidiStreamHandler(
+		MuscatServiceExposePortProcedure,
+		svc.ExposePort,
+		connect.WithSchema(muscatServiceMethods.ByName("ExposePort")),
+		connect.WithHandlerOptions(opts...),
+	)
 	muscatServiceExecHandler := connect.NewUnaryHandler(
 		MuscatServiceExecProcedure,
 		svc.Exec,
@@ -269,6 +294,8 @@ func NewMuscatServiceHandler(svc MuscatServiceHandler, opts ...connect.HandlerOp
 			muscatServiceSetInputMethodHandler.ServeHTTP(w, r)
 		case MuscatServicePortForwardProcedure:
 			muscatServicePortForwardHandler.ServeHTTP(w, r)
+		case MuscatServiceExposePortProcedure:
+			muscatServiceExposePortHandler.ServeHTTP(w, r)
 		case MuscatServiceExecProcedure:
 			muscatServiceExecHandler.ServeHTTP(w, r)
 		default:
@@ -306,6 +333,10 @@ func (UnimplementedMuscatServiceHandler) SetInputMethod(context.Context, *connec
 
 func (UnimplementedMuscatServiceHandler) PortForward(context.Context, *connect.BidiStream[pb.PortForwardRequest, pb.PortForwardResponse]) error {
 	return connect.NewError(connect.CodeUnimplemented, errors.New("dev.warashi.muscat.v1.MuscatService.PortForward is not implemented"))
+}
+
+func (UnimplementedMuscatServiceHandler) ExposePort(context.Context, *connect.BidiStream[pb.ExposePortRequest, pb.ExposePortResponse]) error {
+	return connect.NewError(connect.CodeUnimplemented, errors.New("dev.warashi.muscat.v1.MuscatService.ExposePort is not implemented"))
 }
 
 func (UnimplementedMuscatServiceHandler) Exec(context.Context, *connect.Request[pb.ExecRequest]) (*connect.Response[pb.ExecResponse], error) {
