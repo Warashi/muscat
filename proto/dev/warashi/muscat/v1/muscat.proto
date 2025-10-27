@@ -50,6 +50,51 @@ message PortForwardResponse {
   bytes body = 1;
 }
 
+message ExposePortInit {
+  uint32 local_port = 1;
+  uint32 remote_port = 2;
+  string bind_address = 3;
+  bool public = 4;
+}
+
+message ExposePortConnectionOpen {
+  uint64 connection_id = 1;
+  uint32 remote_port = 2;
+  string remote_address = 3;
+}
+
+message ExposePortConnectionData {
+  uint64 connection_id = 1;
+  bytes payload = 2;
+}
+
+message ExposePortConnectionClose {
+  uint64 connection_id = 1;
+  string error = 2;
+  bool reset = 3;
+}
+
+message ExposePortError {
+  string message = 1;
+}
+
+message ExposePortRequest {
+  oneof frame {
+    ExposePortInit init = 1;
+    ExposePortConnectionData data = 2;
+    ExposePortConnectionClose close = 3;
+  }
+}
+
+message ExposePortResponse {
+  oneof frame {
+    ExposePortConnectionOpen open = 1;
+    ExposePortConnectionData data = 2;
+    ExposePortConnectionClose close = 3;
+    ExposePortError error = 4;
+  }
+}
+
 message ExecRequest {
   string command = 1;
   repeated string args = 2;
@@ -77,6 +122,9 @@ service MuscatService {
   // Forwarded port is send as metadata.
   // 1 connection is 1 stream.
   rpc PortForward(stream PortForwardRequest) returns (stream PortForwardResponse);
+
+  // ExposePort exposes local listener on the client to the server.
+  rpc ExposePort(stream ExposePortRequest) returns (stream ExposePortResponse);
 
   rpc Exec(ExecRequest) returns (ExecResponse);
 }

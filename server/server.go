@@ -21,6 +21,7 @@ import (
 	"github.com/Warashi/muscat/v2/consts"
 	"github.com/Warashi/muscat/v2/pb"
 	"github.com/Warashi/muscat/v2/pb/pbconnect"
+	serverexposeport "github.com/Warashi/muscat/v2/server/exposeport"
 	"github.com/Warashi/muscat/v2/server/internal/clipboard"
 	"github.com/Warashi/muscat/v2/stream"
 )
@@ -177,6 +178,15 @@ func (*MuscatServer) PortForward(
 	wg.Wait()
 
 	return nil
+}
+
+// ExposePort implements pbconnect.MuscatServiceHandler.
+func (*MuscatServer) ExposePort(
+	ctx context.Context,
+	stream *connect.BidiStream[pb.ExposePortRequest, pb.ExposePortResponse],
+) error {
+	session := serverexposeport.NewSession(ctx, stream, serverexposeport.Config{})
+	return session.Run()
 }
 
 // Exec implements pbconnect.MuscatServiceHandler.

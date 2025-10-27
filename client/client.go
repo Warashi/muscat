@@ -18,6 +18,7 @@ import (
 	"golang.org/x/net/http2"
 	"google.golang.org/protobuf/proto"
 
+	clientexposeport "github.com/Warashi/muscat/v2/client/exposeport"
 	"github.com/Warashi/muscat/v2/consts"
 	"github.com/Warashi/muscat/v2/pb"
 	"github.com/Warashi/muscat/v2/pb/pbconnect"
@@ -170,6 +171,16 @@ func (m *MuscatClient) PortForward(ctx context.Context, port string) error {
 			}
 		}()
 	}
+}
+
+func (m *MuscatClient) ExposePort(
+	ctx context.Context,
+	init *pb.ExposePortInit,
+	cfg clientexposeport.Config,
+) error {
+	stream := m.pb.ExposePort(ctx)
+	session := clientexposeport.NewSession(ctx, stream, init, cfg)
+	return session.Run()
 }
 
 func (m *MuscatClient) portForward(ctx context.Context, port string, conn net.Conn) (err error) {
