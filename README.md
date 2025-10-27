@@ -16,7 +16,7 @@ locally running TCP services to your remote environment through SSH.
 ### SSH configuration
 ```conf:~/.ssh/config
 Host workbench
-  HostName workbench.remote.local
+  Hostname workbench.remote.local
   RemoteForward /home/<remote_user>/.muscat.socket /Users/<local_user>/.muscat.socket
   ExitOnForwardFailure yes
 ```
