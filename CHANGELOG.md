@@ -1,5 +1,11 @@
 # Changelog
 
+## [v2.3.15](https://github.com/Warashi/muscat/compare/v2.3.14...v2.3.15) - 2025-11-17
+- build(deps): bump github/codeql-action from 4.30.8 to 4.31.0 by @dependabot[bot] in https://github.com/Warashi/muscat/pull/98
+- build(deps): bump github/codeql-action from 4.31.0 to 4.31.2 by @dependabot[bot] in https://github.com/Warashi/muscat/pull/101
+- build(deps): bump github/codeql-action from 4.31.2 to 4.31.3 by @dependabot[bot] in https://github.com/Warashi/muscat/pull/103
+- build(deps): bump golang.org/x/net from 0.46.0 to 0.47.0 by @dependabot[bot] in https://github.com/Warashi/muscat/pull/102
+
 ## [v2.3.14](https://github.com/Warashi/muscat/compare/v2.3.13...v2.3.14) - 2025-10-13
 - build(deps): bump github/codeql-action from 3.30.6 to 4.30.8 by @dependabot[bot] in https://github.com/Warashi/muscat/pull/94
 - build(deps): update all deps by @Warashi in https://github.com/Warashi/muscat/pull/96
