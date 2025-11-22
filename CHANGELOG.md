@@ -1,5 +1,11 @@
 # Changelog
 
+## [v2.3.16](https://github.com/Warashi/muscat/compare/v2.3.15...v2.3.16) - 2025-11-22
+- build(deps): bump actions/setup-go from 6.0.0 to 6.1.0 by @dependabot[bot] in https://github.com/Warashi/muscat/pull/104
+- build(deps): bump actions/create-github-app-token from 2.1.4 to 2.2.0 by @dependabot[bot] in https://github.com/Warashi/muscat/pull/105
+- build(deps): bump github/codeql-action from 4.31.3 to 4.31.4 by @dependabot[bot] in https://github.com/Warashi/muscat/pull/107
+- build(deps): bump actions/checkout from 5.0.0 to 6.0.0 by @dependabot[bot] in https://github.com/Warashi/muscat/pull/106
+
 ## [v2.3.15](https://github.com/Warashi/muscat/compare/v2.3.14...v2.3.15) - 2025-11-17
 - build(deps): bump github/codeql-action from 4.30.8 to 4.31.0 by @dependabot[bot] in https://github.com/Warashi/muscat/pull/98
 - build(deps): bump github/codeql-action from 4.31.0 to 4.31.2 by @dependabot[bot] in https://github.com/Warashi/muscat/pull/101
