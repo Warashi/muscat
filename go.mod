@@ -7,7 +7,7 @@ require (
 	github.com/Warashi/go-swim v0.0.0-20220912062543-3596431113e5
 	github.com/atotto/clipboard v0.1.4
 	github.com/skratchdot/open-golang v0.0.0-20200116055534-eef842397966
-	github.com/spf13/cobra v1.10.1
+	github.com/spf13/cobra v1.10.2
 	golang.design/x/clipboard v0.7.1
 	golang.org/x/net v0.47.0
 	google.golang.org/protobuf v1.36.10
