@@ -9,7 +9,7 @@ require (
 	github.com/skratchdot/open-golang v0.0.0-20200116055534-eef842397966
 	github.com/spf13/cobra v1.10.1
 	golang.design/x/clipboard v0.7.1
-	golang.org/x/net v0.47.0
+	golang.org/x/net v0.48.0
 	google.golang.org/protobuf v1.36.10
 )
 
@@ -19,6 +19,6 @@ require (
 	golang.org/x/exp/shiny v0.0.0-20251009144603-d2f985daa21b // indirect
 	golang.org/x/image v0.32.0 // indirect
 	golang.org/x/mobile v0.0.0-20251009145931-8baca8bf4eeb // indirect
-	golang.org/x/sys v0.38.0 // indirect
-	golang.org/x/text v0.31.0 // indirect
+	golang.org/x/sys v0.39.0 // indirect
+	golang.org/x/text v0.32.0 // indirect
 )
