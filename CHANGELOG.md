@@ -1,5 +1,8 @@
 # Changelog
 
+## [v2.3.17](https://github.com/Warashi/muscat/compare/v2.3.16...v2.3.17) - 2026-03-01
+- build(deps): bump actions/checkout from 6.0.1 to 6.0.2 in the github-actions-all group by @dependabot[bot] in https://github.com/Warashi/muscat/pull/121
+
 ## [v2.3.16](https://github.com/Warashi/muscat/compare/v2.3.15...v2.3.16) - 2025-12-27
 - build(deps): bump actions/setup-go from 6.0.0 to 6.1.0 by @dependabot[bot] in https://github.com/Warashi/muscat/pull/104
 - build(deps): bump actions/create-github-app-token from 2.1.4 to 2.2.0 by @dependabot[bot] in https://github.com/Warashi/muscat/pull/105
